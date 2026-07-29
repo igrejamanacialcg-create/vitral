@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vitral — Gestão Ministerial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --noite:#0B0E24; --noite-2:#111637; --noite-3:#181F4C;
+  --chumbo:rgba(232,180,74,.20);
+  --ouro:#E8B44A; --ouro-claro:#F6D48B;
+  --texto:#EDEFFA; --texto-2:#A3ABD6; --texto-3:#6E77A8;
+
+  --cobalto:#3B6FE0; --esmeralda:#23A06B; --rosa:#D2568F; --laranja:#E07A3B;
+  --ambar:#E8B44A; --turquesa:#1FA8B5; --ametista:#8B5CF6; --rubi:#E04E5C; --indigo:#6C7BE8;
+
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --corpo:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+
+  --r:14px; --r-sm:9px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1100px 620px at 78% -10%, rgba(139,92,246,.20), transparent 60%),
+    radial-gradient(900px 520px at 8% 4%, rgba(59,111,224,.18), transparent 62%),
+    var(--noite);
+  color:var(--texto); font-family:var(--corpo); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; min-height:100vh;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;font-family:var(--display);font-weight:600;letter-spacing:-.02em}
+a{color:var(--ouro-claro)}
+
+/* ---------- SHELL ---------- */
+.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}
+.side{
+  border-right:1px solid var(--chumbo); padding:22px 14px 90px;
+  background:linear-gradient(180deg,rgba(24,31,76,.62),rgba(11,14,36,.2));
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.marca{display:flex;gap:11px;align-items:center;padding:0 8px 20px;margin-bottom:14px;border-bottom:1px solid var(--chumbo)}
+.marca .selo{
+  width:40px;height:40px;border-radius:11px;flex:none;display:grid;place-items:center;
+  background:linear-gradient(150deg,var(--ametista),var(--cobalto) 55%,var(--turquesa));
+  box-shadow:0 0 0 1px rgba(232,180,74,.45), 0 8px 22px -10px var(--ametista);
+  font-family:var(--display);font-weight:700;color:#fff;font-size:19px;overflow:hidden
+}
+.marca .selo img{width:100%;height:100%;object-fit:cover}
+.marca b{display:block;font-family:var(--display);font-size:16px;font-weight:600;line-height:1.15}
+.marca span{font-size:11px;color:var(--texto-3);letter-spacing:.14em;text-transform:uppercase}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav button{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  background:none;border:0;padding:10px 12px;border-radius:10px;color:var(--texto-2);
+  cursor:pointer;transition:background .16s,color .16s
+}
+.nav button svg{width:17px;height:17px;flex:none;opacity:.75}
+.nav button:hover{background:rgba(255,255,255,.05);color:var(--texto)}
+.nav button.on{background:linear-gradient(90deg,rgba(232,180,74,.16),rgba(232,180,74,.02));color:var(--ouro-claro);box-shadow:inset 2px 0 0 var(--ouro)}
+.nav button.on svg{opacity:1}
+.nav .grupo{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--texto-3);padding:18px 12px 7px}
+.main{padding:26px 30px 70px;max-width:1320px;min-width:0}
+
+/* ---------- COMPONENTES ---------- */
+.topo{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.olho{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ouro);margin-bottom:6px}
+.topo h1{font-size:30px}
+.topo p{margin:5px 0 0;color:var(--texto-2);font-size:13.5px;max-width:62ch}
+
+.card{background:linear-gradient(165deg,rgba(24,31,76,.72),rgba(17,22,55,.5));border:1px solid var(--chumbo);border-radius:var(--r);padding:18px}
+.card h3{font-size:16px;margin-bottom:3px}
+.card .sub{font-size:12.5px;color:var(--texto-3);margin-bottom:14px}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);
+  border:1px solid var(--chumbo);color:var(--texto);padding:9px 15px;border-radius:10px;
+  cursor:pointer;font-weight:500;font-size:13.5px;transition:.16s
+}
+.btn:hover{background:rgba(255,255,255,.12);border-color:rgba(232,180,74,.45)}
+.btn.ouro{background:linear-gradient(140deg,var(--ouro),#C9932F);color:#241a04;border-color:transparent;font-weight:600}
+.btn.ouro:hover{filter:brightness(1.09)}
+.btn.fino{padding:6px 11px;font-size:12.5px;border-radius:8px}
+.btn.perigo:hover{border-color:var(--rubi);color:#ffb9bf}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.pane:focus-visible{outline:2px solid var(--ouro);outline-offset:2px}
+
+label.f{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--texto-3);margin-bottom:5px}
+input[type=text],input[type=date],input[type=time],input[type=month],input[type=number],input[type=tel],input[type=file],select,textarea{
+  width:100%;background:rgba(8,11,30,.7);border:1px solid rgba(255,255,255,.11);border-radius:9px;
+  padding:9px 11px;color:var(--texto)
+}
+textarea{resize:vertical;min-height:70px}
+select option{background:#12173a}
+.grade{display:grid;gap:13px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid;letter-spacing:.03em;white-space:nowrap}
+.ponto{width:7px;height:7px;border-radius:99px;flex:none}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--texto-3);padding:0 10px 9px;font-weight:500}
+td{padding:10px;border-top:1px solid rgba(255,255,255,.07);vertical-align:middle}
+tbody tr:hover{background:rgba(255,255,255,.035)}
+
+.avatar{width:34px;height:34px;border-radius:10px;flex:none;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:13px;color:#0B0E24;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+
+.vazio{text-align:center;padding:44px 20px;color:var(--texto-3);border:1px dashed var(--chumbo);border-radius:var(--r)}
+.vazio b{display:block;font-family:var(--display);font-size:17px;color:var(--texto);margin-bottom:6px;font-weight:600}
+
+/* ---------- HERO / VITRAL ---------- */
+.hero{
+  position:relative;border:1px solid var(--chumbo);border-radius:18px;overflow:hidden;
+  margin-bottom:20px;min-height:320px;display:flex;align-items:flex-end;
+  background:linear-gradient(115deg,#1b1150,#0e2a58 45%,#0c3f4a);
+}
+/* caixa mais alta acima (320px) porque com box baixo e largo, object-fit:cover precisa
+   ampliar demais a foto pra cobrir a largura — cortando a fachada quase inteira */
+.hero .capa{position:absolute;inset:0;object-fit:cover;object-position:center 8%;width:100%;height:100%;opacity:.55}
+.hero .veu{position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,14,36,.94) 8%,rgba(11,14,36,.55) 55%,rgba(11,14,36,.15))}
+.hero .luz{position:absolute;inset:0;opacity:.5;
+  background:repeating-linear-gradient(104deg,transparent 0 42px,rgba(232,180,74,.16) 42px 44px)}
+/* os raios de luz combinam com o gradiente abstrato de fundo, mas ficam riscados por cima de uma foto real */
+.hero:has(.capa:not(.esconde)) .luz{display:none}
+.hero .dentro{position:relative;padding:24px 26px;width:100%;display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap;justify-content:space-between}
+.hero h2{font-size:29px;line-height:1.08;max-width:16ch}
+.hero .quando{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ouro);margin-bottom:9px}
+.proximo{text-align:right}
+.proximo .rot{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--texto-2)}
+.proximo .dia{font-family:var(--display);font-size:44px;font-weight:700;line-height:1;letter-spacing:-.03em}
+.proximo .det{font-family:var(--mono);font-size:12px;color:var(--texto-2)}
+
+.numeros{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--chumbo);border:1px solid var(--chumbo);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+.numeros div{background:var(--noite-2);padding:15px 17px}
+.numeros b{display:block;font-family:var(--display);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.numeros span{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--texto-3)}
+
+/* mosaico de vitral — assinatura do painel */
+.vitral{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--ouro);
+  border:2px solid var(--ouro);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px -34px #000}
+.pane{
+  position:relative;background:var(--noite-2);padding:15px 15px 14px;min-height:126px;
+  cursor:pointer;border:0;text-align:left;color:inherit;overflow:hidden;
+  transition:transform .2s ease, filter .2s ease;
+  animation:acende .6s ease both;
+}
+@keyframes acende{from{opacity:0;filter:saturate(.2)}to{opacity:1;filter:none}}
+.pane::before{content:"";position:absolute;inset:0;opacity:.9;
+  background:radial-gradient(120% 92% at 50% -25%, var(--cor) 0%, transparent 66%)}
+.pane:hover{filter:brightness(1.22)}
+.pane>*{position:relative}
+.pane .nome{font-family:var(--display);font-size:14.5px;font-weight:600;line-height:1.15;letter-spacing:-.01em}
+.pane .qtd{font-family:var(--mono);font-size:11px;color:var(--texto-2);margin-top:3px}
+.pane .escalados{margin-top:11px;display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--texto)}
+.pane .escalados i{font-style:normal;opacity:.55}
+.pane .barra{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.1)}
+.pane .barra i{display:block;height:100%;background:var(--cor)}
+
+/* ---------- ESCALA ---------- */
+.dia-card{border:1px solid var(--chumbo);border-radius:var(--r);overflow:hidden;background:var(--noite-2)}
+.dia-topo{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 15px;
+  background:linear-gradient(90deg,rgba(232,180,74,.13),transparent)}
+.dia-topo b{font-family:var(--display);font-size:16px}
+.dia-topo span{font-family:var(--mono);font-size:11.5px;color:var(--texto-2)}
+.linhas{display:grid;grid-template-columns:1fr;padding:5px 0}
+.linha{display:grid;grid-template-columns:210px 1fr;gap:10px;align-items:center;padding:6px 15px}
+.linha:hover{background:rgba(255,255,255,.03)}
+.linha .m{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--texto-2)}
+.linha .pessoas{display:flex;flex-wrap:wrap;gap:7px}
+.slot{display:flex;align-items:center;gap:7px;background:rgba(8,11,30,.6);border:1px solid rgba(255,255,255,.1);
+  border-radius:99px;padding:3px 5px 3px 4px}
+.slot select{background:none;border:0;padding:2px 4px;font-size:12.5px;max-width:190px}
+.slot.livre{border-color:rgba(224,78,92,.6);background:rgba(224,78,92,.12)}
+
+.equilibrio{display:flex;flex-direction:column;gap:7px;max-height:430px;overflow-y:auto;padding-right:6px}
+.eq-linha{display:grid;grid-template-columns:1fr 132px 30px;gap:10px;align-items:center;font-size:13px}
+.eq-barra{height:8px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden}
+.eq-barra i{display:block;height:100%;background:linear-gradient(90deg,var(--turquesa),var(--ouro))}
+.eq-linha b{font-family:var(--mono);font-size:13px;text-align:right;font-weight:500}
+
+/* ---------- MÍDIA ---------- */
+.galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:13px}
+.midia{border:1px solid var(--chumbo);border-radius:var(--r);overflow:hidden;background:var(--noite-2)}
+.midia .thumb{aspect-ratio:16/10;background:#080b1e;display:grid;place-items:center;color:var(--texto-3);font-size:12px;overflow:hidden}
+.midia .thumb img,.midia .thumb iframe{width:100%;height:100%;object-fit:cover;border:0}
+.midia .info{padding:10px 12px;display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.midia .info b{font-size:13.5px;font-weight:500;font-family:var(--corpo)}
+.midia .info small{color:var(--texto-3);font-size:11px}
+
+/* ---------- MODAL / TOAST ---------- */
+.modal{position:fixed;inset:0;background:rgba(5,7,20,.76);backdrop-filter:blur(5px);display:none;
+  align-items:flex-start;justify-content:center;padding:36px 16px;z-index:60;overflow-y:auto}
+.modal.on{display:flex}
+.modal .cx{background:#141a41;border:1px solid var(--chumbo);border-radius:16px;width:100%;max-width:660px;padding:22px;box-shadow:0 40px 90px -30px #000}
+.modal h3{font-size:20px;margin-bottom:16px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:#141a41;border:1px solid var(--ouro);
+  color:var(--texto);padding:11px 18px;border-radius:11px;opacity:0;transition:.25s;z-index:80;font-size:13.5px;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.carregando{position:fixed;inset:0;background:rgba(11,14,36,.62);backdrop-filter:blur(1px);z-index:200;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.carregando.on{display:flex}
+.carregando .giro{width:40px;height:40px;border-radius:50%;border:3px solid var(--chumbo);border-top-color:var(--ouro);animation:girar .8s linear infinite}
+.carregando .txt{color:var(--texto);font-size:14px;font-weight:600;letter-spacing:.02em}
+@keyframes girar{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.carregando .giro{animation:none;border-top-color:var(--chumbo)}}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{cursor:pointer;user-select:none;font-size:12px;padding:6px 11px;border-radius:99px;border:1px solid rgba(255,255,255,.14);background:rgba(8,11,30,.5)}
+.chip.on{border-color:var(--cor,var(--ouro));background:color-mix(in srgb,var(--cor,var(--ouro)) 22%,transparent);color:#fff}
+.chip input{display:none}
+
+.esconde{display:none!important}
+.direita{display:flex;gap:9px;flex-wrap:wrap}
+hr.fio{border:0;border-top:1px solid var(--chumbo);margin:20px 0}
+
+@media (max-width:940px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;bottom:0;top:auto;height:auto;width:100%;z-index:50;padding:7px 8px;border-right:0;border-top:1px solid var(--chumbo);background:#0d1231}
+  .side .marca,.side .grupo{display:none}
+  .nav{flex-direction:row;overflow-x:auto;gap:2px}
+  .nav button{flex-direction:column;gap:4px;font-size:10px;padding:8px 12px;white-space:nowrap}
+  .nav button.on{box-shadow:none}
+  .main{padding:18px 15px 110px}
+  .g2,.g3,.g4,.numeros{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .vitral{grid-template-columns:repeat(2,1fr)}
+  .linha{grid-template-columns:1fr;gap:5px}
+  .hero .dentro{flex-direction:column;align-items:flex-start}
+  .hero{min-height:220px}
+  .proximo{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  .side,.topo .direita,.nao-imprime{display:none!important}
+  body{background:#fff;color:#000}
+  .app{display:block}
+  .card,.dia-card{border-color:#bbb;background:#fff;color:#000;break-inside:avoid}
+  .dia-topo{background:#eee}
+  .slot{border-color:#bbb;background:#fff}
+  .slot select{color:#000}
+}
+
+/* ---------- RELATÓRIO DE IMPRESSÃO (escala em PDF) ---------- */
+#relatorioImpressao{display:none}
+@media print{
+  .app,.tela-login,.modal,.carregando{display:none!important}
+  #relatorioImpressao{display:block!important}
+  body{background:#fff;margin:0}
+  @page{size:landscape;margin:10mm}
+}
+.ri-pagina{
+  --ri-azul:#0F3B5C; --ri-azul-2:#154E77; --ri-verde:#0E5C3E; --ri-preto:#12161C;
+  --ri-azul-claro:#EAF2F8; --ri-verde-claro:#EAF6F0;
+  font-family:'Instrument Sans',Arial,sans-serif;color:var(--ri-preto);
+  width:100%;margin:0 auto;padding:10px 6px;
+}
+.ri-cabecalho{display:flex;align-items:center;gap:16px;border-bottom:3px solid var(--ri-azul);padding-bottom:14px;margin-bottom:16px}
+.ri-cabecalho img{width:48px;height:auto;flex:none}
+.ri-cabecalho .ri-nomes{flex:1}
+.ri-cabecalho h1{font-family:'Fraunces',serif;font-size:20px;color:var(--ri-azul);margin:0}
+.ri-cabecalho .ri-lema{font-size:11.5px;color:var(--ri-verde);font-style:italic;margin-top:2px}
+.ri-cabecalho .ri-mes{font-size:12.5px;color:var(--ri-preto);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:6px}
+.ri-cabecalho .ri-canto{margin-left:auto;text-align:right;flex:none}
+.ri-cabecalho .ri-mesano{font-size:15px;font-weight:700;color:var(--ri-azul);text-transform:capitalize}
+.ri-cabecalho .ri-turno{font-size:12px;font-weight:600;color:var(--ri-verde);text-transform:uppercase;letter-spacing:.03em;margin-top:3px}
+.ri-matriz{width:100%;border-collapse:collapse;font-size:10.5px;table-layout:fixed}
+.ri-matriz th{background:var(--ri-azul);color:#fff;padding:7px 6px;font-size:10.5px;text-align:center;font-weight:600;border:1px solid var(--ri-azul-2)}
+.ri-matriz th:first-child{text-align:left;padding-left:10px;width:150px}
+.ri-matriz td{padding:6px 6px;border:1px solid #d8e2e8;vertical-align:middle;text-align:center;word-wrap:break-word}
+.ri-matriz td.ri-min{font-weight:700;text-align:left;padding-left:10px;background:var(--ri-azul-claro);color:var(--ri-azul-2)}
+.ri-matriz td.ri-vago{color:#b0b0b0;font-style:italic}
+.ri-matriz tbody tr:nth-child(even) td:not(.ri-min){background:#f7fafb}
+.ri-assinatura{margin-top:30px;text-align:center;break-inside:avoid}
+.ri-assinatura .ri-linha{width:260px;border-top:1px solid var(--ri-preto);margin:0 auto 6px}
+.ri-assinatura .ri-nome-assina{font-family:'Fraunces',serif;font-size:14px;color:var(--ri-azul)}
+.ri-rodape{margin-top:10px;text-align:center;font-size:9.5px;color:#999}
+
+/* ---------- LOGIN E PAPÉIS ---------- */
+.somente-gestor{}
+body:not([data-papel="gestor"]) .somente-gestor{display:none!important}
+
+.tela-login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;z-index:100;
+  background:radial-gradient(1100px 620px at 78% -10%, rgba(139,92,246,.20), transparent 60%),
+    radial-gradient(900px 520px at 8% 4%, rgba(59,111,224,.18), transparent 62%), var(--noite)}
+.tela-login .cx{width:100%;max-width:360px;background:linear-gradient(165deg,rgba(24,31,76,.85),rgba(17,22,55,.7));
+  border:1px solid var(--chumbo);border-radius:18px;padding:28px;box-shadow:0 40px 90px -30px #000}
+.tela-login .selo{width:52px;height:52px;border-radius:14px;margin:0 auto 16px;display:grid;place-items:center;
+  background:linear-gradient(150deg,var(--ametista),var(--cobalto) 55%,var(--turquesa));
+  font-family:var(--display);font-weight:700;color:#fff;font-size:22px}
+.tela-login h2{text-align:center;font-size:22px;margin-bottom:4px}
+.tela-login p{text-align:center;color:var(--texto-3);font-size:12.5px;margin:0 0 20px}
+.tela-login .erro{color:#ffb9bf;font-size:12.5px;margin-top:10px;min-height:16px;text-align:center}
+.tela-login .btn{width:100%;justify-content:center;margin-top:14px}
+
+.usuario-atual{display:flex;align-items:center;gap:9px;padding:10px 8px;margin-top:10px;border-top:1px solid var(--chumbo)}
+.usuario-atual .avatar{width:30px;height:30px;font-size:11.5px}
+.usuario-atual .nome{font-size:12.5px;font-weight:500}
+.usuario-atual .papel{font-size:10.5px;color:var(--texto-3);text-transform:uppercase;letter-spacing:.08em}
+.usuario-atual button{margin-left:auto;background:none;border:0;color:var(--texto-3);cursor:pointer;font-size:11px}
+.usuario-atual button:hover{color:var(--rubi)}
+</style>
+</head>
+<body>
+
+<div class="tela-login" id="telaLogin">
+  <div class="cx">
+    <div class="selo" id="loginSelo">V</div>
+    <h2>Vitral</h2>
+    <p>Entre com seu usuário e senha para acessar a gestão ministerial.</p>
+    <div class="grade">
+      <div><label class="f">Usuário</label><input type="text" id="loginUsuario" autocomplete="username"></div>
+      <div><label class="f">Senha</label><input type="password" id="loginSenha" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
+    </div>
+    <button class="btn ouro" onclick="fazerLogin()">Entrar</button>
+    <div class="erro" id="loginErro"></div>
+  </div>
+</div>
+
+<div class="app esconde" id="appPrincipal">
+  <aside class="side">
+    <div class="marca">
+      <div class="selo" id="selo">FR</div>
+      <div>
+        <b id="marcaNome">Filhos do Reino</b>
+        <span>Gestão Ministerial</span>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="grupo">Visão geral</div>
+      <button data-v="painel" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Painel</button>
+      <div class="grupo">Pessoas</div>
+      <button data-v="membros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 14.8c2.1.6 3.5 2.4 3.5 5.2"/></svg>Membros</button>
+      <button data-v="pastoreio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="M8 15h4"/></svg>Pastoreio</button>
+      <div class="grupo">Serviço</div>
+      <button data-v="escala"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="2.5"/></svg>Escalas</button>
+      <button data-v="ministerios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>Ministérios</button>
+      <div class="grupo">Acervo</div>
+      <button data-v="midia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="m10 9.5 5 2.5-5 2.5z"/></svg>Mídia</button>
+      <button data-v="usuarios" class="somente-gestor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>Usuários</button>
+      <button data-v="dados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Dados</button>
+    </nav>
+    <div class="usuario-atual" id="usuarioAtual">
+      <div class="avatar" style="background:linear-gradient(140deg,#8B5CF6,#3B6FE0);color:#fff" id="usuarioAvatar">—</div>
+      <div><div class="nome" id="usuarioNome">—</div><div class="papel" id="usuarioPapel">—</div></div>
+      <button onclick="sair()" title="Sair">Sair</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ============ PAINEL ============ -->
+    <section id="v-painel">
+      <div class="hero">
+        <img class="capa esconde" id="heroCapa" alt="">
+        <div class="veu"></div><div class="luz"></div>
+        <div class="dentro">
+          <div>
+            <div class="quando" id="heroEyebrow">Casa de oração</div>
+            <h2 id="heroTitulo">Filhos do Reino</h2>
+          </div>
+          <div class="proximo">
+            <div class="rot">Próximo culto</div>
+            <div class="dia" id="proxDia">—</div>
+            <div class="det" id="proxDet">defina os dias de culto em Escalas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="numeros">
+        <div><b id="nMembros">0</b><span>Membros ativos</span></div>
+        <div><b id="nMinisterios">9</b><span>Ministérios</span></div>
+        <div><b id="nEscalados">0</b><span>Escalas no mês</span></div>
+        <div><b id="nPastoreio">0</b><span>Agendas abertas</span></div>
+      </div>
+
+      <div class="topo" style="margin-bottom:12px">
+        <div><div class="olho">Mosaico</div><h1 style="font-size:22px">Ministérios no próximo culto</h1></div>
+        <div class="direita"><button class="btn fino" onclick="irPara('escala')">Abrir escala do mês</button></div>
+      </div>
+      <div class="vitral" id="vitral"></div>
+
+      <div class="grade g2" style="margin-top:20px">
+        <div class="card">
+          <h3>Próximos pastoreios</h3>
+          <div class="sub">Visitas, aconselhamentos e ligações agendadas</div>
+          <div id="painelPastoreio"></div>
+        </div>
+        <div class="card">
+          <h3>Equilíbrio de folga</h3>
+          <div class="sub">Quantas vezes cada pessoa serve no mês corrente</div>
+          <div class="equilibrio" id="painelEquilibrio"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MEMBROS ============ -->
+    <section id="v-membros" class="esconde">
+      <div class="topo">
+        <div><div class="olho">Cadastro</div><h1>Membros</h1>
+          <p>Quem pode ser escalado, em quais ministérios serve e quando está disponível.</p></div>
+        <div class="direita">
+          <button class="btn" onclick="exportarMembrosCSV()">Baixar CSV</button>
+          <button class="btn ouro" onclick="abrirMembro()">+ Novo membro</button>
+        </div>
+      </div>
+      <div class="grade g3" style="margin-bottom:14px">
+        <input type="text" id="buscaMembro" placeholder="Buscar por nome ou telefone" oninput="renderMembros()">
+        <select id="filtroMin" onchange="renderMembros()"></select>
+        <select id="filtroStatus" onchange="renderMembros()">
+          <option value="">Todos os status</option><option value="1">Somente ativos</option><option value="0">Somente inativos</option>
+        </select>
+      </div>
+      <div class="card" style="padding:16px 8px 8px"><div id="tabelaMembros"></div></div>
+    </section>
+
+    <!-- ============ ESCALA ============ -->
+    <section id="v-escala" class="esconde">
+      <div class="topo">
+        <div><div class="olho">Escala automática</div><h1>Escala mensal</h1>
+          <p>O sistema distribui as pessoas sem repetir na sequência e mantém a folga equilibrada entre todos do ministério.</p></div>
+        <div class="direita nao-imprime">
+          <button class="btn" onclick="copiarWhats()">Copiar para WhatsApp</button>
+          <button class="btn" onclick="imprimirRelatorio(mesAtivo, S.ministerios.map(m=>m.id), 'Matutino')">Imprimir Matutino</button>
+          <button class="btn" onclick="imprimirRelatorio(mesAtivo, S.ministerios.map(m=>m.id), 'Noturno')">Imprimir Noturno</button>
+          <button class="btn ouro somente-gestor" onclick="abrirGerarEscalaModal()">Gerar escala</button>
+        </div>
+      </div>
+
+      <div class="card nao-imprime" style="margin-bottom:16px">
+        <h3>Mês</h3>
+        <div class="sub">Escolha o mês para ver a escala.</div>
+        <div style="max-width:230px"><input type="month" id="mesEscala" onchange="renderEscala()"></div>
+      </div>
+
+      <div id="escalaSaida"></div>
+
+      <div class="card" style="margin-top:16px">
+        <h3>Conferência de equilíbrio</h3>
+        <div class="sub">Se alguém está servindo muito acima da média, troque manualmente no seletor da escala.</div>
+        <div class="equilibrio" id="equilibrioEscala"></div>
+      </div>
+    </section>
+
+    <!-- ============ MINISTÉRIOS ============ -->
+    <section id="v-ministerios" class="esconde">
+      <div class="topo">
+        <div><div class="olho">Configuração</div><h1>Ministérios</h1>
+          <p>Quantas pessoas cada ministério precisa por culto e quem está inscrito.</p></div>
+        <div class="direita somente-gestor"><button class="btn" onclick="abrirMinisterio()">+ Novo ministério</button></div>
+      </div>
+      <div class="grade g2" id="listaMinisterios"></div>
+    </section>
+
+    <!-- ============ PASTOREIO ============ -->
+    <section id="v-pastoreio" class="esconde">
+      <div class="topo">
+        <div><div class="olho">Cuidado</div><h1>Agenda de pastoreio</h1>
+          <p>Visitas, aconselhamentos, hospital e ligações — com responsável e situação.</p></div>
+        <div class="direita"><button class="btn ouro" onclick="abrirPastoreio()">+ Novo agendamento</button></div>
+      </div>
+      <div class="grade g3" style="margin-bottom:14px">
+        <select id="filtroPastTipo" onchange="renderPastoreio()"></select>
+        <select id="filtroPastStatus" onchange="renderPastoreio()">
+          <option value="">Todas as situações</option><option>Agendado</option><option>Concluído</option><option>Remarcar</option>
+        </select>
+        <input type="text" id="buscaPastoreio" placeholder="Buscar por pessoa ou assunto" oninput="renderPastoreio()">
+      </div>
+      <div class="card" style="padding:16px 8px 8px"><div id="tabelaPastoreio"></div></div>
+    </section>
+
+    <!-- ============ MÍDIA ============ -->
+    <section id="v-midia" class="esconde">
+      <div class="topo">
+        <div><div class="olho">Acervo</div><h1>Vídeos e imagens</h1>
+          <p>Guarde os links das pregações, artes e fotos usadas em cada culto.</p></div>
+        <div class="direita"><button class="btn ouro" onclick="abrirMidia()">+ Adicionar mídia</button></div>
+      </div>
+      <div class="grade g3" style="margin-bottom:14px">
+        <select id="filtroMidia" onchange="renderMidia()">
+          <option value="">Todo o acervo</option><option>Vídeo</option><option>Imagem</option>
+        </select>
+        <input type="text" id="buscaMidia" placeholder="Buscar por título ou tema" oninput="renderMidia()">
+      </div>
+      <div class="galeria" id="galeria"></div>
+    </section>
+
+    <!-- ============ DADOS ============ -->
+    <section id="v-dados" class="esconde">
+      <div class="topo">
+        <div><div class="olho">Conta</div><h1>Meus dados</h1>
+          <p>Sua conta, a identidade da igreja e os relatórios do sistema.</p></div>
+      </div>
+      <div class="grade g2">
+        <div class="card somente-gestor">
+          <h3>Identidade da igreja</h3>
+          <div class="sub">Aparece no topo do painel e nas escalas impressas.</div>
+          <div class="grade">
+            <div><label class="f">Nome</label><input type="text" id="cfgNome"></div>
+            <div><label class="f">Linha de apoio</label><input type="text" id="cfgLema" placeholder="Casa de oração"></div>
+            <div><label class="f">Link do logo (imagem quadrada)</label><input type="text" id="cfgLogo" placeholder="https://..."></div>
+            <div style="margin:-4px 0 9px"><label class="f">Ou carregue o logo (imagem, até 8MB)</label><input type="file" accept="image/*" onchange="enviarImagem(this,'#cfgLogo')"></div>
+            <div><label class="f">Link da foto de capa</label><input type="text" id="cfgCapa" placeholder="https://..."></div>
+            <div style="margin:-4px 0 9px"><label class="f">Ou carregue a foto de capa (imagem, até 8MB)</label><input type="file" accept="image/*" onchange="enviarImagem(this,'#cfgCapa')"></div>
+            <button class="btn ouro" onclick="salvarConfig()">Salvar identidade</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Minha senha</h3>
+          <div class="sub">Sua senha é pessoal — nem o gestor consegue ver a atual.</div>
+          <div class="grade">
+            <div><label class="f">Senha atual</label><input type="password" id="senhaAtual"></div>
+            <div><label class="f">Nova senha</label><input type="password" id="senhaNova"></div>
+            <button class="btn ouro" onclick="alterarSenha()">Alterar senha</button>
+          </div>
+        </div>
+      </div>
+      <div class="grade g2" style="margin-top:14px">
+        <div class="card">
+          <h3>Exportar</h3>
+          <div class="sub">Relatório de membros para conferência ou impressão.</div>
+          <div class="grade"><button class="btn" onclick="exportarMembrosCSV()">Baixar membros em CSV</button></div>
+        </div>
+        <div class="card">
+          <h3>Onde os dados ficam</h3>
+          <div class="sub" style="margin-bottom:0">Tudo é gravado direto na planilha do Google Sheets, e as imagens ficam numa pasta do Google Drive — não existe cópia local neste computador. A própria planilha já é o backup.</div>
+        </div>
+      </div>
+      <div class="card somente-gestor" style="margin-top:14px">
+        <h3>Como o cérebro da escala decide</h3>
+        <div class="sub">Ordem de prioridade ao escolher cada pessoa</div>
+        <ol style="color:var(--texto-2);font-size:13.5px;line-height:1.75;padding-left:19px;margin:0">
+          <li>Serve neste ministério, está ativo e disponível no dia da semana do culto.</li>
+          <li>Quem serviu <b>menos vezes</b> no mês entra primeiro.</li>
+          <li>Quem está há <b>mais tempo sem servir</b> desempata.</li>
+          <li>Quem tem menor histórico acumulado entra na frente.</li>
+          <li>A folga mínima é respeitada; só é quebrada se não houver mais ninguém disponível — e nesse caso o nome aparece marcado.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ USUÁRIOS ============ -->
+    <section id="v-usuarios" class="esconde">
+      <div class="topo">
+        <div><div class="olho">Acesso</div><h1>Usuários</h1>
+          <p>Quem pode entrar no sistema. Cadastro só registra, envia imagens e extrai relatório — não apaga nada e não mexe na escala.</p></div>
+        <div class="direita"><button class="btn ouro" onclick="abrirUsuario()">+ Novo usuário</button></div>
+      </div>
+      <div class="card" style="padding:16px 8px 8px"><div id="tabelaUsuarios"></div></div>
+    </section>
+
+  </main>
+</div>
+
+<div class="modal" id="modal"><div class="cx" id="modalCx"></div></div>
+<div id="relatorioImpressao"></div>
+<div class="toast" id="toast"></div>
+<div class="carregando" id="carregando"><div class="giro"></div><div class="txt" id="carregandoTxt">Salvando...</div></div>
+
+<script>
+/* ---- ponte de armazenamento: usa o storage do Claude quando existe,
+        e o localStorage do navegador quando roda como arquivo local ---- */
+if(!window.storage){
+  window.storage = {
+    async get(k){ const v = localStorage.getItem(k); return v===null ? null : {key:k, value:v}; },
+    async set(k,v){ localStorage.setItem(k,v); return {key:k, value:v}; },
+    async delete(k){ localStorage.removeItem(k); return {key:k, deleted:true}; },
+    async list(p=''){ return {keys:Object.keys(localStorage).filter(x=>x.startsWith(p))}; }
+  };
+}
+
+/* ================= ESTADO ================= */
+const CHAVE_SESSAO = 'vitral-sessao-v1';
+/* Cole aqui a URL do Web App publicado no Apps Script — veja DEPLOY.md */
+const API_URL = 'https://script.google.com/macros/s/AKfycbwWyrQUuAhVFnE5xbz4291lFO8ySqKxOqKuuRwUfPAXs4elBXutLTl_dUR3thzZNFw/exec';
+
+const TIPOS_PAST = ['Visita','Aconselhamento','Hospital','Ligação','Célula','Reunião'];
+const DIAS = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const DIAS_CURTO = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+const LOGO_MANANCIAL = 'data:image/png;base64,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';
+
+let S = {config:{}, ministerios:[], cultos:[], membros:[], escalas:{}, pastoreio:[], midia:[]};
+let SESSAO = null;
+let vistaAtual='painel', mesAtivo='';
+
+const uid = () => Math.random().toString(36).slice(2,9);
+const $ = s => document.querySelector(s);
+const esc = t => String(t??'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function aviso(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'),2600); }
+
+/* ================= API ================= */
+/* overlay bloqueia a tela inteira enquanto uma chamada está em andamento — evita
+   duplo clique em "Gerar escala"/"Salvar" gerando registros repetidos no meio do delay do Apps Script */
+let chamadasEmAndamento = 0;
+const TEXTO_ACAO = {gerarEscala:'Gerando escala...', login:'Entrando...'};
+function mostrarCarregando(acao){
+  chamadasEmAndamento++;
+  $('#carregandoTxt').textContent = TEXTO_ACAO[acao] || 'Salvando...';
+  $('#carregando').classList.add('on');
+}
+function esconderCarregando(){
+  chamadasEmAndamento = Math.max(0, chamadasEmAndamento-1);
+  if(!chamadasEmAndamento) $('#carregando').classList.remove('on');
+}
+async function chamarApi(acao, dados){
+  if(!/^https?:\/\//.test(API_URL)){ aviso('Configuração pendente: defina API_URL no index.html (veja DEPLOY.md).'); throw new Error('API_URL não configurada.'); }
+  mostrarCarregando(acao);
+  try{
+    const resposta = await fetch(API_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({acao, token: SESSAO?.token||'', dados: dados||{}})
+    });
+    const json = await resposta.json();
+    if(json.erro){
+      if(/sess(ã|a)o expirada/i.test(json.erro)) await sair(true);
+      throw new Error(json.erro);
+    }
+    return json.dados;
+  } finally { esconderCarregando(); }
+}
+
+/* sessão fica local (token, não dado de negócio) — o resto sempre vem da API */
+async function salvarSessao(){ try{ await window.storage.set(CHAVE_SESSAO, JSON.stringify(SESSAO)); }catch(e){} }
+async function carregarSessao(){
+  try{ const r = await window.storage.get(CHAVE_SESSAO); if(r && r.value) return JSON.parse(r.value); }catch(e){}
+  return null;
+}
+async function limparSessao(){ try{ await window.storage.delete(CHAVE_SESSAO); }catch(e){} }
+
+/* ================= LOGIN / SESSÃO ================= */
+async function fazerLogin(){
+  const usuario = $('#loginUsuario').value.trim(), senha = $('#loginSenha').value;
+  const erroEl = $('#loginErro'); erroEl.textContent='';
+  if(!usuario || !senha){ erroEl.textContent='Preencha usuário e senha.'; return; }
+  if(!/^https?:\/\//.test(API_URL)){ erroEl.textContent='Configuração pendente: defina API_URL no index.html (veja DEPLOY.md).'; return; }
+  mostrarCarregando('login');
+  try{
+    const resposta = await fetch(API_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({acao:'login', dados:{usuario, senha}})
+    });
+    const json = await resposta.json();
+    if(json.erro){ erroEl.textContent = json.erro; return; }
+    SESSAO = json;
+    await salvarSessao();
+    await entrarNoSistema();
+  }catch(e){ erroEl.textContent = 'Não foi possível conectar ao servidor.'; }
+  finally { esconderCarregando(); }
+}
+async function sair(silencioso){
+  SESSAO = null; await limparSessao();
+  $('#appPrincipal').classList.add('esconde');
+  $('#telaLogin').classList.remove('esconde');
+  $('#loginSenha').value=''; $('#loginErro').textContent='';
+  if(!silencioso) aviso('Sessão encerrada.');
+}
+function aplicarPapel(){
+  document.body.dataset.papel = SESSAO.papel;
+  $('#usuarioNome').textContent = SESSAO.nome;
+  $('#usuarioPapel').textContent = SESSAO.papel==='gestor' ? 'Gestor' : 'Cadastro';
+  $('#usuarioAvatar').textContent = iniciais(SESSAO.nome);
+}
+async function entrarNoSistema(){
+  aplicarPapel();
+  try{ S = await chamarApi('carregarTudo', {}); }
+  catch(e){ aviso('Erro ao carregar dados: '+e.message); return; }
+  $('#telaLogin').classList.add('esconde');
+  $('#appPrincipal').classList.remove('esconde');
+  iniciarTela();
+}
+
+/* ================= UPLOAD DE IMAGEM ================= */
+function arquivoParaBase64(arquivo){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(',')[1]);
+    r.onerror = reject;
+    r.readAsDataURL(arquivo);
+  });
+}
+async function enviarImagem(inputArquivo, seletorAlvo){
+  const arquivo = inputArquivo.files[0]; if(!arquivo) return;
+  if(!arquivo.type.startsWith('image/')){ aviso('Selecione um arquivo de imagem.'); inputArquivo.value=''; return; }
+  if(arquivo.size > 8*1024*1024){ aviso('Imagem muito grande — envie um arquivo de até 8MB.'); inputArquivo.value=''; return; }
+  try{
+    aviso('Enviando imagem...');
+    const base64 = await arquivoParaBase64(arquivo);
+    const r = await chamarApi('uploadImagem', {nomeArquivo:arquivo.name, tipoMime:arquivo.type, base64});
+    $(seletorAlvo).value = r.url;
+    aviso('Imagem enviada.');
+  }catch(e){ aviso('Erro ao enviar imagem: '+e.message); }
+  inputArquivo.value='';
+}
+
+/* ================= DATAS ================= */
+function hojeISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function mesISO(){ return hojeISO().slice(0,7); }
+function dt(iso){ const [a,m,d]=iso.split('-').map(Number); return new Date(a,m-1,d); }
+function fmt(iso){ const d=dt(iso); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; }
+function fmtLongo(iso){ const d=dt(iso); return `${DIAS[d.getDay()]}, ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+function diasEntre(a,b){ return Math.round((dt(b)-dt(a))/86400000); }
+function nomeMes(m){ const [a,me]=m.split('-'); return new Date(a,me-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'}); }
+
+/* cultosSelecionados: Set de ids de S.cultos a considerar. Se omitido/null, considera todos
+   (usado pelo painel/próximo-culto, que não tem noção de "seleção" de uma geração específica). */
+function datasDoMes(mes, cultosSelecionados){
+  const [ano,m] = mes.split('-').map(Number);
+  const fim = new Date(ano,m,0).getDate(); const out=[];
+  const permitido = c => !cultosSelecionados || cultosSelecionados.has(c.id);
+
+  S.cultos.filter(c=>c.tipo==='Fixo' && permitido(c)).forEach(c=>{
+    for(let d=1; d<=fim; d++){
+      const wd = new Date(ano,m-1,d).getDay();
+      if(wd !== c.diaSemanai) continue;
+      const data = `${ano}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      out.push({data, cultId:c.id, hora:c.hora});
+    }
+  });
+
+  /* Sexta Profética: última sexta do mês, sempre automática */
+  const cultProfetica = S.cultos.find(c=>c.nome==='Sexta Profética');
+  if(cultProfetica && permitido(cultProfetica)){
+    for(let d=fim; d>=1; d--){
+      if(new Date(ano,m-1,d).getDay()===5){
+        const data = `${ano}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        out.push({data, cultId:cultProfetica.id, hora:cultProfetica.hora});
+        break;
+      }
+    }
+  }
+
+  /* demais esporádicos: usam a data marcada no próprio culto (ver aba Cultos/modal Gerar escala) */
+  S.cultos.filter(c=>c.tipo==='Esporádico' && c.nome!=='Sexta Profética' && permitido(c)).forEach(c=>{
+    if(c.data && c.data.slice(0,7)===mes) out.push({data:c.data, cultId:c.id, hora:c.hora});
+  });
+
+  return out.sort((a,b)=>a.data.localeCompare(b.data));
+}
+
+/* ================= HELPERS DE DADOS ================= */
+const membro = id => S.membros.find(m=>m.id===id);
+const ministerio = id => S.ministerios.find(m=>m.id===id);
+const iniciais = n => n.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+const primeiroNome = n => (n||'').trim().split(/\s+/)[0] || '';
+/* nome curto para escala/impressão: só primeiro nome, ou "Fulano e Beltrana" se tiver cônjuge cadastrado */
+function nomeExibicao(m){
+  if(!m) return '?';
+  const nome = primeiroNome(m.nome);
+  return m.conjuge ? `${nome} e ${primeiroNome(m.conjuge)}` : nome;
+}
+function corMinistNome(id){ const m=ministerio(id); return m?m.cor:'#8B5CF6'; }
+
+function historico(){
+  const h={};
+  Object.entries(S.escalas).forEach(([mes,esc])=>{
+    esc.slots.forEach(s=>{
+      if(!s.membroId) return;
+      h[s.membroId] = h[s.membroId] || {total:0, ultima:'', porMes:{}};
+      h[s.membroId].total++;
+      h[s.membroId].porMes[mes] = (h[s.membroId].porMes[mes]||0)+1;
+      if(s.data > (h[s.membroId].ultima||'')) h[s.membroId].ultima = s.data;
+    });
+  });
+  return h;
+}
+
+/* ================= NAVEGAÇÃO ================= */
+function irPara(v){
+  vistaAtual=v;
+  document.querySelectorAll('.main > section').forEach(s=>s.classList.add('esconde'));
+  $('#v-'+v).classList.remove('esconde');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+  window.scrollTo({top:0,behavior:'instant'});
+  if(v==='painel') renderPainel();
+  if(v==='membros') renderMembros();
+  if(v==='escala') renderEscala();
+  if(v==='ministerios') renderMinisterios();
+  if(v==='pastoreio') renderPastoreio();
+  if(v==='midia') renderMidia();
+  if(v==='usuarios') renderUsuarios();
+}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>irPara(b.dataset.v));
+
+/* ================= PAINEL ================= */
+/* só considera cultos Fixos (Domingo Matutino/Noturno) — Sexta Profética e demais esporádicos
+   são eventos especiais do mês, não o "próximo culto" de referência do painel */
+function proximoCulto(){
+  const hoje = hojeISO();
+  const fixos = new Set(S.cultos.filter(c=>c.tipo==='Fixo').map(c=>c.id));
+  const meses = [mesISO()];
+  const [a,m]=mesISO().split('-').map(Number);
+  meses.push(`${m===12?a+1:a}-${String(m===12?1:m+1).padStart(2,'0')}`);
+  for(const mes of meses){
+    for(const d of datasDoMes(mes, fixos)) if(d.data>=hoje) return d;
+  }
+  return null;
+}
+function renderPainel(){
+  const c=S.config;
+  $('#marcaNome').textContent = c.nome;
+  $('#heroTitulo').textContent = c.nome;
+  $('#heroEyebrow').textContent = c.lema || 'Casa de oração';
+  $('#selo').innerHTML = c.logo ? `<img src="${esc(c.logo)}" alt="">` : iniciais(c.nome);
+  const capa=$('#heroCapa');
+  if(c.capa){ capa.src=c.capa; capa.classList.remove('esconde'); } else capa.classList.add('esconde');
+
+  const p = proximoCulto();
+  $('#proxDia').textContent = p ? fmt(p.data) : '—';
+  $('#proxDet').textContent = p ? `${DIAS[dt(p.data).getDay()]} · ${p.hora}` : 'defina os dias de culto em Escalas';
+
+  const ativos = S.membros.filter(m=>m.ativo);
+  $('#nMembros').textContent = ativos.length;
+  $('#nMinisterios').textContent = S.ministerios.length;
+  const esc0 = S.escalas[mesISO()];
+  $('#nEscalados').textContent = esc0 ? esc0.slots.filter(s=>s.membroId).length : 0;
+  $('#nPastoreio').textContent = S.pastoreio.filter(x=>x.status==='Agendado').length;
+
+  /* mosaico */
+  const escalaP = p ? (S.escalas[p.data.slice(0,7)]||null) : null;
+  $('#vitral').innerHTML = S.ministerios.map((m,i)=>{
+    const inscritos = ativos.filter(x=>x.ministerios.includes(m.id)).length;
+    const nomes = escalaP ? escalaP.slots.filter(s=>s.data===p.data && s.ministerioId===m.id)
+      .map(s=> s.membroId ? (membro(s.membroId)?.nome.split(' ')[0]||'?') : '<i>a definir</i>') : [];
+    const cob = Math.min(100, inscritos ? Math.round(inscritos/Math.max(m.qtd*2,1)*100) : 0);
+    return `<button class="pane" style="--cor:${m.cor};animation-delay:${i*45}ms" data-ministerio-id="${m.id}" data-ministerio-nome="${esc(m.nome)}" onclick="abrirMinisterioModal(this.dataset.ministerioId, this.dataset.ministerioNome)">
+      <div class="nome">${esc(m.nome)}</div>
+      <div class="qtd">${inscritos} inscrito${inscritos===1?'':'s'} · precisa de ${m.qtd}</div>
+      <div class="escalados">${nomes.length?nomes.map(n=>`<span>${n}</span>`).join(''):'<i>sem escala gerada</i>'}</div>
+      <div class="barra"><i style="width:${cob}%"></i></div>
+    </button>`;
+  }).join('');
+
+  /* pastoreio */
+  const prox = S.pastoreio.filter(x=>x.status==='Agendado').sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora)).slice(0,5);
+  $('#painelPastoreio').innerHTML = prox.length ? prox.map(x=>`
+    <div style="display:flex;gap:11px;align-items:center;padding:9px 0;border-top:1px solid rgba(255,255,255,.07)">
+      <div class="avatar" style="background:linear-gradient(140deg,#8B5CF6,#3B6FE0);color:#fff">${esc(iniciais(x.pessoa))}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13.5px">${esc(x.pessoa)}</div>
+        <div style="font-size:11.5px;color:var(--texto-3)">${esc(x.tipo)} · ${esc(x.responsavel||'sem responsável')}</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--texto-2);text-align:right">${fmt(x.data)}<br>${esc(x.hora||'')}</div>
+    </div>`).join('') : '<div style="color:var(--texto-3);font-size:13px;padding:8px 0">Nada agendado. Abra a aba Pastoreio para marcar a primeira visita.</div>';
+
+  renderEquilibrio('#painelEquilibrio', mesISO());
+}
+
+function renderEquilibrio(alvo, mes){
+  const esc0 = S.escalas[mes];
+  const cont = {};
+  S.membros.filter(m=>m.ativo).forEach(m=>cont[m.id]=0);
+  if(esc0) esc0.slots.forEach(s=>{ if(s.membroId!=null && cont[s.membroId]!=null) cont[s.membroId]++; });
+  const lista = Object.entries(cont).sort((a,b)=>b[1]-a[1] || (membro(a[0])?.nome||'').localeCompare(membro(b[0])?.nome||''));
+  const max = Math.max(1, ...lista.map(l=>l[1]));
+  const el = $(alvo);
+  if(!lista.length){ el.innerHTML='<div style="color:var(--texto-3);font-size:13px">Cadastre membros para acompanhar o equilíbrio.</div>'; return; }
+  el.innerHTML = lista.map(([id,n])=>`
+    <div class="eq-linha">
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(membro(id)?.nome||'—')}</span>
+      <div class="eq-barra"><i style="width:${Math.round(n/max*100)}%"></i></div>
+      <b>${n}</b>
+    </div>`).join('');
+}
+
+/* ================= MEMBROS ================= */
+function renderMembros(){
+  const fm = $('#filtroMin');
+  if(fm.options.length !== S.ministerios.length+1)
+    fm.innerHTML = '<option value="">Todos os ministérios</option>' + S.ministerios.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
+  const q = ($('#buscaMembro').value||'').toLowerCase();
+  const fmin = fm.value, fst = $('#filtroStatus').value;
+  const lista = S.membros.filter(m=>
+    (!q || m.nome.toLowerCase().includes(q) || (m.telefone||'').includes(q)) &&
+    (!fmin || m.ministerios.includes(fmin)) &&
+    (fst==='' || String(m.ativo?1:0)===fst)
+  ).sort((a,b)=>a.nome.localeCompare(b.nome));
+
+  if(!lista.length){ $('#tabelaMembros').innerHTML = `<div class="vazio"><b>Nenhum membro por aqui</b>Cadastre a equipe para o sistema poder montar as escalas.</div>`; return; }
+
+  const h = historico();
+  $('#tabelaMembros').innerHTML = `<table><thead><tr>
+      <th>Membro</th><th>Ministérios</th><th>Disponível</th><th>Já serviu</th><th>Status</th><th></th>
+    </tr></thead><tbody>` + lista.map(m=>{
+      const cor = m.ministerios[0] ? corMinistNome(m.ministerios[0]) : '#8B5CF6';
+      return `<tr>
+      <td><div style="display:flex;gap:10px;align-items:center">
+        <div class="avatar" style="background:${cor}">${m.foto?`<img src="${esc(m.foto)}">`:esc(iniciais(m.nome))}</div>
+        <div><div style="font-weight:500">${esc(m.nome)}</div>
+        <div style="font-size:11.5px;color:var(--texto-3);font-family:var(--mono)">${esc(m.telefone||'—')}</div></div>
+      </div></td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:5px">${m.ministerios.map(id=>{
+          const mi=ministerio(id); if(!mi) return '';
+          return `<span class="tag" style="border-color:${mi.cor}55;color:#fff;background:${mi.cor}22"><i class="ponto" style="background:${mi.cor}"></i>${esc(mi.nome)}</span>`;
+        }).join('') || '<span style="color:var(--texto-3)">—</span>'}</div></td>
+      <td style="font-size:12px;color:var(--texto-2)">${m.disponibilidade.map(d=>{const c=S.cultos.find(x=>x.id===d); return c?c.nome:d;}).join(' · ')||'—'}</td>
+      <td style="font-family:var(--mono);font-size:12.5px">${h[m.id]?.total||0}${h[m.id]?.ultima?`<div style="font-size:11px;color:var(--texto-3)">últ. ${fmt(h[m.id].ultima)}</div>`:''}</td>
+      <td>${m.ativo?'<span class="tag" style="border-color:#23A06B66;background:#23A06B1f">Ativo</span>':'<span class="tag" style="border-color:#6E77A866;color:var(--texto-3)">Inativo</span>'}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn fino" onclick="abrirMembro('${m.id}')">Editar</button>
+        ${SESSAO.papel==='gestor'?`<button class="btn fino perigo" onclick="apagarMembro('${m.id}')">Excluir</button>`:''}</td>
+    </tr>`}).join('') + '</tbody></table>';
+}
+
+function abrirMembro(id){
+  const m = id ? membro(id) : {id:'', nome:'', telefone:'', foto:'', nascimento:'', conjuge:'', ministerios:[], disponibilidade:S.cultos.map(c=>c.id), ativo:true, obs:''};
+  $('#modalCx').innerHTML = `
+    <h3>${id?'Editar membro':'Novo membro'}</h3>
+    <div class="grade g2">
+      <div><label class="f">Nome completo</label><input type="text" id="fNome" value="${esc(m.nome)}"></div>
+      <div><label class="f">WhatsApp</label><input type="tel" id="fTel" value="${esc(m.telefone)}" placeholder="(67) 9 9999-0000"></div>
+      <div><label class="f">Aniversário</label><input type="date" id="fNasc" value="${esc(m.nascimento)}"></div>
+      <div><label class="f">Link da foto</label><input type="text" id="fFoto" value="${esc(m.foto)}" placeholder="https://..."></div>
+    </div>
+    <div style="margin-top:9px"><label class="f">Ou carregue uma foto (imagem, até 8MB)</label><input type="file" accept="image/*" onchange="enviarImagem(this,'#fFoto')"></div>
+    <hr class="fio">
+    <label class="f">Cônjuge (opcional — para escalar como casal, ex. Recepção)</label>
+    <input type="text" id="fConjuge" value="${esc(m.conjuge||'')}" placeholder="Nome do(a) cônjuge">
+    <hr class="fio">
+    <label class="f">Ministérios em que serve</label>
+    <div class="chips" id="fMins">${S.ministerios.map(x=>`
+      <label class="chip ${m.ministerios.includes(x.id)?'on':''}" style="--cor:${x.cor}">
+        <input type="checkbox" value="${x.id}" ${m.ministerios.includes(x.id)?'checked':''} onchange="this.parentNode.classList.toggle('on',this.checked)">
+        ${esc(x.nome)}</label>`).join('')}</div>
+    <hr class="fio">
+    <label class="f">Disponível nos cultos</label>
+    <div class="chips" id="fCultos">${S.cultos.map(c=>`
+      <label class="chip ${m.disponibilidade.includes(c.id)?'on':''}">
+        <input type="checkbox" value="${c.id}" ${m.disponibilidade.includes(c.id)?'checked':''} onchange="this.parentNode.classList.toggle('on',this.checked)">
+        ${esc(c.nome)}</label>`).join('')}</div>
+    <hr class="fio">
+    <div class="grade g2">
+      <div><label class="f">Situação</label><select id="fAtivo"><option value="1" ${m.ativo?'selected':''}>Ativo (entra nas escalas)</option><option value="0" ${!m.ativo?'selected':''}>Inativo (fica de fora)</option></select></div>
+      <div><label class="f">Observações</label><input type="text" id="fObs" value="${esc(m.obs)}" placeholder="Ex.: viaja no fim do mês"></div>
+    </div>
+    <div class="direita" style="justify-content:flex-end;margin-top:20px">
+      <button class="btn" onclick="fecharModal()">Cancelar</button>
+      <button class="btn ouro" onclick="salvarMembro('${id||''}')">Salvar membro</button>
+    </div>`;
+  $('#modal').classList.add('on');
+}
+async function salvarMembro(id){
+  const nome = $('#fNome').value.trim();
+  if(!nome){ aviso('Escreva o nome do membro para salvar.'); return; }
+  const dados = {
+    id: id||undefined, nome, telefone:$('#fTel').value.trim(), foto:$('#fFoto').value.trim(), nascimento:$('#fNasc').value,
+    conjuge:$('#fConjuge').value.trim(),
+    ministerios:[...$('#fMins').querySelectorAll('input:checked')].map(i=>i.value),
+    disponibilidade:[...$('#fCultos').querySelectorAll('input:checked')].map(i=>i.value),
+    ativo:$('#fAtivo').value==='1', obs:$('#fObs').value.trim()
+  };
+  try{
+    S = await chamarApi('salvarMembro', dados);
+    fecharModal(); renderMembros(); aviso('Membro salvo.');
+  }catch(e){ aviso('Erro ao salvar: '+e.message); }
+}
+async function apagarMembro(id){
+  if(!confirm('Excluir este membro? As escalas já geradas mantêm o histórico.')) return;
+  try{ S = await chamarApi('apagarMembro', {id}); renderMembros(); aviso('Membro excluído.'); }
+  catch(e){ aviso('Erro ao excluir: '+e.message); }
+}
+function fecharModal(){ $('#modal').classList.remove('on'); }
+$('#modal').onclick = e => { if(e.target.id==='modal') fecharModal(); };
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') fecharModal(); });
+
+function abrirMinisterioModal(ministerioId, ministerioNome){
+  const m = S.ministerios.find(x=>x.id===ministerioId);
+  const ativos = S.membros.filter(x=>x.ativo && x.ministerios.includes(ministerioId));
+  const escalasDoMes = S.escalas[mesISO()] || {slots:[]};
+  const escaladosEssMes = escalasDoMes.slots.filter(s=>s.ministerioId===ministerioId && s.membroId);
+
+  $('#modalCx').innerHTML = `
+        <div class="topo">
+          <h2 style="font-size:20px;color:${m.cor}">${esc(ministerioNome)}</h2>
+          <button class="btn fino" onclick="fecharModal()">✕ Fechar</button>
+        </div>
+        <div class="abas" style="display:flex;gap:2px;border-bottom:1px solid var(--texto-3);margin:0 0 20px 0">
+          <button class="aba on" onclick="mudarAba(this,'relatorio')" style="flex:1;padding:12px;text-align:center;border:none;background:none;cursor:pointer;color:var(--texto);border-bottom:3px solid ${m.cor}">📄 Relatório</button>
+          <button class="aba" onclick="mudarAba(this,'cadastro')" style="flex:1;padding:12px;text-align:center;border:none;background:none;cursor:pointer;color:var(--texto-2)">➕ Cadastrar membro</button>
+          <button class="aba" onclick="mudarAba(this,'editar')" style="flex:1;padding:12px;text-align:center;border:none;background:none;cursor:pointer;color:var(--texto-2)">✏️ Editar escala</button>
+          <button class="aba" onclick="mudarAba(this,'historico')" style="flex:1;padding:12px;text-align:center;border:none;background:none;cursor:pointer;color:var(--texto-2)">📊 Histórico</button>
+        </div>
+
+        <div id="abaRelatorio" class="aba-conteudo">
+          <h3>Escala de ${esc(ministerioNome)} - ${mesISO()}</h3>
+          <p><b>Inscritos:</b> ${ativos.length} (precisa de ${m.qtd})</p>
+          <p><b>Escalados neste mês:</b> ${escaladosEssMes.length}</p>
+          <ul>${escaladosEssMes.map(s=>{
+            const mem = membro(s.membroId);
+            return `<li>${esc(mem?.nome||'?')} - ${esc(s.data)}</li>`;
+          }).join('')}</ul>
+          <button class="btn ouro" onclick="imprimirRelatorio('${mesISO()}',['${ministerioId}'])">🖨️ Imprimir</button>
+        </div>
+
+        <div id="abaCadastro" class="aba-conteudo" style="display:none">
+          <p>Redirecionar para cadastro de membro com ${esc(ministerioNome)} pré-selecionado</p>
+          <button class="btn ouro" onclick="fecharModal(); abrirMembro('')">➕ Novo membro</button>
+        </div>
+
+        <div id="abaEditar" class="aba-conteudo" style="display:none">
+          <p>Editar escala do mês para ${esc(ministerioNome)}</p>
+          <p style="color:var(--texto-2);font-size:12px">(em desenvolvimento)</p>
+        </div>
+
+        <div id="abaHistorico" class="aba-conteudo" style="display:none">
+          <label>Escolha o mês:</label>
+          <select id="mesHistorico" onchange="carregarHistoricoMinisterio('${ministerioId}',this.value)">
+            <option value="">Selecione...</option>
+            ${Object.keys(S.escalas).sort().reverse().map(mes=>`<option value="${mes}">${mes}</option>`).join('')}
+          </select>
+          <div id="conteudoHistorico" style="margin-top:15px"></div>
+        </div>`;
+  $('#modal').classList.add('on');
+}
+
+function mudarAba(botao, abaId){
+  document.querySelectorAll('.aba').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.aba-conteudo').forEach(a=>a.style.display='none');
+  botao.classList.add('on');
+  $('#aba'+abaId.charAt(0).toUpperCase()+abaId.slice(1)).style.display='block';
+}
+
+function carregarHistoricoMinisterio(ministerioId, mes){
+  if(!mes) { $('#conteudoHistorico').innerHTML=''; return; }
+  const escala = S.escalas[mes];
+  if(!escala) { $('#conteudoHistorico').innerHTML='Sem dados'; return; }
+  const slots = escala.slots.filter(s=>s.ministerioId===ministerioId && s.membroId);
+  const html = slots.length ? `<h4>Escalados em ${mes}:</h4><ul>${slots.map(s=>`<li>${esc(membro(s.membroId)?.nome||'?')} - ${esc(s.data)}</li>`).join('')}</ul>` : 'Nenhum escalado neste mês';
+  $('#conteudoHistorico').innerHTML = html;
+}
+
+/* ================= MINISTÉRIOS ================= */
+function renderMinisterios(){
+  const ativos = S.membros.filter(m=>m.ativo);
+  $('#listaMinisterios').innerHTML = S.ministerios.map(m=>{
+    const gente = ativos.filter(x=>x.ministerios.includes(m.id));
+    const risco = gente.length < m.qtd*2;
+    return `<div class="card" style="border-left:3px solid ${m.cor}">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+        <div><h3>${esc(m.nome)}</h3>
+          <div class="sub" style="margin-bottom:10px">${gente.length} pessoa${gente.length===1?'':'s'} · ${m.qtd} por culto${risco?' · <span style="color:#ffb9bf">equipe curta para revezar</span>':''}</div></div>
+        <div style="display:flex;gap:6px" class="somente-gestor">
+          <button class="btn fino" onclick="abrirMinisterio('${m.id}')">Ajustar</button>
+          <button class="btn fino perigo" onclick="apagarMinisterio('${m.id}')">×</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${gente.map(g=>`<span class="tag" style="border-color:${m.cor}55;background:${m.cor}1a">${esc(g.nome)}</span>`).join('') || '<span style="color:var(--texto-3);font-size:12.5px">Ninguém inscrito ainda — edite os membros para incluir.</span>'}</div>
+    </div>`;
+  }).join('');
+}
+function abrirMinisterio(id){
+  const m = id ? ministerio(id) : {nome:'', qtd:1, cor:'#8B5CF6'};
+  $('#modalCx').innerHTML = `<h3>${id?'Ajustar ministério':'Novo ministério'}</h3>
+    <div class="grade g2">
+      <div><label class="f">Nome</label><input type="text" id="gNome" value="${esc(m.nome)}"></div>
+      <div><label class="f">Pessoas por culto</label><input type="number" id="gQtd" min="1" max="12" value="${m.qtd}"></div>
+    </div>
+    <div style="margin-top:13px"><label class="f">Cor no mosaico</label>
+      <div class="chips" id="gCores">${['#3B6FE0','#23A06B','#D2568F','#E07A3B','#E8B44A','#1FA8B5','#8B5CF6','#E04E5C','#6C7BE8'].map(c=>
+        `<button class="chip ${m.cor===c?'on':''}" style="--cor:${c}" data-c="${c}" onclick="[...this.parentNode.children].forEach(x=>x.classList.remove('on'));this.classList.add('on')">
+          <i class="ponto" style="background:${c};display:inline-block;margin-right:5px"></i>&nbsp;</button>`).join('')}</div></div>
+    <div class="direita" style="justify-content:flex-end;margin-top:20px">
+      <button class="btn" onclick="fecharModal()">Cancelar</button>
+      <button class="btn ouro" onclick="salvarMinisterio('${id||''}')">Salvar</button></div>`;
+  $('#modal').classList.add('on');
+}
+async function salvarMinisterio(id){
+  const nome=$('#gNome').value.trim(); if(!nome){ aviso('Dê um nome ao ministério.'); return; }
+  const cor = $('#gCores .on')?.dataset.c || '#8B5CF6';
+  const dados = {id: id||undefined, nome, qtd:Math.max(1,+$('#gQtd').value||1), cor};
+  try{
+    S = await chamarApi('salvarMinisterio', dados);
+    fecharModal(); renderMinisterios(); aviso('Ministério salvo.');
+  }catch(e){ aviso('Erro ao salvar: '+e.message); }
+}
+async function apagarMinisterio(id){
+  if(!confirm('Excluir este ministério? Ele sai do cadastro dos membros.')) return;
+  try{ S = await chamarApi('apagarMinisterio', {id}); renderMinisterios(); aviso('Ministério excluído.'); }
+  catch(e){ aviso('Erro ao excluir: '+e.message); }
+}
+
+/* ================= RELATÓRIO DE IMPRESSÃO ================= */
+/* matriz: ministérios em linha (ordem alfabética) x cultos do mês em coluna — cabe numa página só.
+   turno ('Matutino'|'Noturno') separa os relatórios: quem serve de manhã não vê a escala da noite. */
+function turnoDe(hora){ return (hora && hora < '12:00') ? 'Matutino' : 'Noturno'; }
+function montarPrintHtml(mes, ministerioIds, turno){
+  const e = S.escalas[mes];
+  const idsAlvo = new Set(ministerioIds && ministerioIds.length ? ministerioIds : S.ministerios.map(m=>m.id));
+  const cabecalho = `<div class="ri-cabecalho">
+      <img src="${LOGO_MANANCIAL}" alt="">
+      <div class="ri-nomes">
+        <h1>${esc(S.config.nome||'Manancial')}</h1>
+        <div class="ri-lema">${esc(S.config.lema||'')}</div>
+        <div class="ri-mes">Escala Servindo com Amor</div>
+      </div>
+      <div class="ri-canto">
+        <div class="ri-mesano">${nomeMes(mes)}</div>
+        ${turno?`<div class="ri-turno">Culto ${turno}</div>`:''}
+      </div>
+    </div>`;
+  if(!e){
+    return `<div class="ri-pagina">${cabecalho}<p>Nenhuma escala gerada para ${nomeMes(mes)}.</p></div>`;
+  }
+
+  let slotsAlvo = e.slots.filter(s=>idsAlvo.has(s.ministerioId));
+  if(turno) slotsAlvo = slotsAlvo.filter(s=>turnoDe(s.hora)===turno);
+  /* colunas: cultos únicos do mês (data+hora), em ordem cronológica */
+  const cultos = [...new Map(slotsAlvo.map(s=>[s.data+'|'+s.hora,{data:s.data,hora:s.hora}])).values()]
+    .sort((a,b)=> a.data===b.data ? a.hora.localeCompare(b.hora) : a.data.localeCompare(b.data));
+  /* linhas: só ministérios com algum posto neste mês/turno, ordem alfabética */
+  const ministerios = S.ministerios.filter(m=>idsAlvo.has(m.id) && slotsAlvo.some(s=>s.ministerioId===m.id))
+    .sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+
+  if(!cultos.length || !ministerios.length){
+    return `<div class="ri-pagina">${cabecalho}<p>Nenhum posto${turno?` do turno ${turno}`:''} para os ministérios selecionados neste mês.</p></div>`;
+  }
+
+  const colunas = cultos.map(c=>{
+    const d = dt(c.data);
+    return `<th>${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}<br>${DIAS_CURTO[d.getDay()]} · ${esc(c.hora||'')}</th>`;
+  }).join('');
+
+  const linhas = ministerios.map(min=>{
+    const celulas = cultos.map(c=>{
+      const ss = slotsAlvo.filter(s=>s.ministerioId===min.id && s.data===c.data && s.hora===c.hora);
+      if(!ss.length) return `<td class="ri-vago">—</td>`;
+      const nomes = ss.map(s=> s.membroId ? esc(nomeExibicao(membro(s.membroId))) : '<span class="ri-vago">a definir</span>').join('<br>');
+      return `<td>${nomes}</td>`;
+    }).join('');
+    return `<tr><td class="ri-min">${esc(min.nome)}</td>${celulas}</tr>`;
+  }).join('');
+
+  return `<div class="ri-pagina">
+    ${cabecalho}
+    <table class="ri-matriz">
+      <thead><tr><th>Ministério</th>${colunas}</tr></thead>
+      <tbody>${linhas}</tbody>
+    </table>
+    <div class="ri-assinatura">
+      <div class="ri-linha"></div>
+      <div class="ri-nome-assina">Bispa Claudia</div>
+    </div>
+    <div class="ri-rodape">Gerado pelo Vitral — Sistema de Gestão Ministerial</div>
+  </div>`;
+}
+function imprimirRelatorio(mes, ministerioIds, turno){
+  if(!mes){ aviso('Escolha um mês com escala gerada.'); return; }
+  $('#relatorioImpressao').innerHTML = montarPrintHtml(mes, ministerioIds, turno);
+  setTimeout(()=>window.print(), 60);
+}
+
+/* ================= MODAL: GERAR ESCALA ================= */
+function abrirGerarEscalaModal(){
+  const mesPadrao = mesAtivo || mesISO();
+  const fixos = S.cultos.filter(c=>c.tipo==='Fixo');
+  const esporadicos = S.cultos.filter(c=>c.tipo==='Esporádico');
+  $('#modalCx').innerHTML = `
+    <h3>Gerar escala</h3>
+    <div class="grade g2">
+      <div><label class="f">Mês</label><input type="month" id="geMes" value="${mesPadrao}"></div>
+      <div><label class="f">Folga mínima entre serviços</label>
+        <select id="geFolga"><option value="0">Sem folga obrigatória</option><option value="4">4 dias</option><option value="7" selected>7 dias (1 semana)</option><option value="11">11 dias</option><option value="14">14 dias (2 semanas)</option></select></div>
+    </div>
+    <div style="margin-top:9px"><label class="f">Pessoa pode servir</label>
+      <select id="geUmPorDia"><option value="1" selected>1 ministério por culto</option><option value="0">Vários ministérios no mesmo culto</option></select></div>
+    <hr class="fio">
+    <label class="f">Cultos e eventos deste mês</label>
+    <div class="sub" style="margin:-4px 0 10px">Marque quais entram nessa escala. Eventos esporádicos (fora Sexta Profética) precisam da data deste mês.</div>
+    <div id="geCultos" style="display:flex;flex-direction:column;gap:8px">
+      ${fixos.map(c=>`
+        <label class="chip on" style="justify-content:flex-start;--cor:var(--turquesa)">
+          <input type="checkbox" value="${c.id}" checked onchange="this.parentNode.classList.toggle('on',this.checked)">
+          ${esc(c.nome)} <span style="opacity:.6;font-size:11px;margin-left:6px">Fixo · ${esc(c.hora)}</span>
+        </label>`).join('')}
+      ${esporadicos.map(c=>{
+        const auto = c.nome === 'Sexta Profética';
+        const marcado = auto || !!c.data;
+        return `<label class="chip ${marcado?'on':''}" style="justify-content:flex-start;--cor:var(--ametista)">
+          <input type="checkbox" value="${c.id}" ${marcado?'checked':''} onchange="this.parentNode.classList.toggle('on',this.checked)">
+          ${esc(c.nome)} <span style="opacity:.6;font-size:11px;margin-left:6px">Esporádico${auto?' · última sexta (automático)':''}</span>
+          ${auto?'':`<input type="date" data-culto-id="${c.id}" value="${esc(c.data||'')}" onclick="event.preventDefault()" style="margin-left:8px;padding:2px 6px;font-size:11.5px;background:rgba(0,0,0,.35);border-radius:6px;border:1px solid var(--chumbo);color:var(--texto)">`}
+        </label>`;
+      }).join('')}
+    </div>
+    <hr class="fio">
+    <label class="f">Ministérios nesta escala</label>
+    <div class="chips" id="geMinisterios">${S.ministerios.map(x=>`
+      <label class="chip on" style="--cor:${x.cor}">
+        <input type="checkbox" value="${x.id}" checked onchange="this.parentNode.classList.toggle('on',this.checked)">
+        ${esc(x.nome)}</label>`).join('')}</div>
+    <div class="direita" style="justify-content:flex-end;margin-top:20px">
+      <button class="btn" onclick="fecharModal()">Cancelar</button>
+      <button class="btn ouro" onclick="iniciarGeracaoEscala()">Gerar escala</button>
+    </div>`;
+  $('#modal').classList.add('on');
+}
+
+async function iniciarGeracaoEscala(){
+  const mes = $('#geMes').value;
+  if(!mes){ aviso('Escolha o mês.'); return; }
+  const cultosSelecionados = new Set([...document.querySelectorAll('#geCultos input[type=checkbox]:checked')].map(i=>i.value));
+  const ministeriosSelecionados = new Set([...document.querySelectorAll('#geMinisterios input:checked')].map(i=>i.value));
+  const folga = +$('#geFolga').value;
+  const umPorDia = $('#geUmPorDia').value === '1';
+
+  /* eventos esporádicos: persiste a data marcada nessa geração para lembrar da próxima vez */
+  for(const inputData of document.querySelectorAll('#geCultos input[type=date]')){
+    const cultoId = inputData.dataset.cultoId;
+    if(!cultosSelecionados.has(cultoId)) continue;
+    const culto = S.cultos.find(c=>c.id===cultoId);
+    const novaData = inputData.value;
+    if(!novaData){ aviso(`Informe a data de "${culto.nome}" ou desmarque esse evento.`); return; }
+    if(novaData !== culto.data){
+      try{ S = await chamarApi('salvarCulto', {id:cultoId, nome:culto.nome, tipo:culto.tipo, hora:culto.hora, data:novaData}); }
+      catch(e){ aviso('Erro ao salvar data de '+culto.nome+': '+e.message); return; }
+    }
+  }
+
+  await gerarEscala({mes, cultosSelecionados, ministeriosSelecionados, folga, umPorDia});
+}
+
+/* ================= MOTOR DA ESCALA ================= */
+/* opcoes: {mes, cultosSelecionados:Set, ministeriosSelecionados:Set, folga, umPorDia} — ver abrirGerarEscalaModal() */
+async function gerarEscala(opcoes){
+  const mes = opcoes.mes;
+  const folga = opcoes.folga;
+  const umPorDia = opcoes.umPorDia;
+  const ministeriosAlvo = S.ministerios.filter(min => opcoes.ministeriosSelecionados.has(min.id));
+  const datas = datasDoMes(mes, opcoes.cultosSelecionados);
+  if(!datas.length){ aviso('Nenhum culto selecionado cai nesse mês. Confira as datas dos eventos esporádicos.'); return; }
+  if(!ministeriosAlvo.length){ aviso('Selecione ao menos um ministério.'); return; }
+  if(!S.membros.some(m=>m.ativo)){ aviso('Cadastre membros ativos antes de gerar.'); return; }
+
+  /* histórico de meses anteriores dá continuidade ao rodízio */
+  const hist = {};
+  Object.entries(S.escalas).forEach(([k,e])=>{ if(k>=mes) return;
+    e.slots.forEach(s=>{ if(!s.membroId) return;
+      hist[s.membroId] = hist[s.membroId] || {total:0, ultima:''};
+      hist[s.membroId].total++;
+      if(s.data > hist[s.membroId].ultima) hist[s.membroId].ultima = s.data;
+    });
+  });
+
+  const noMes = {}, ultima = {}, totalHist = {}, ultimaNoMinisterio = {};
+  S.membros.forEach(m=>{ noMes[m.id]=0; ultima[m.id]=hist[m.id]?.ultima||''; totalHist[m.id]=hist[m.id]?.total||0; });
+
+  /* folga só é exigível se o ministério tiver gente suficiente para revezar */
+  const porSemana = Math.max(1, S.cultos.length);
+  const apertados = [];
+  const folgaDo = {};
+  ministeriosAlvo.forEach(min=>{
+    const pool = S.membros.filter(m=>m.ativo && m.ministerios.includes(min.id)).length;
+    const cultosNaJanela = Math.max(1, Math.round(folga/7 * porSemana));
+    const precisa = min.qtd * (cultosNaJanela + 1);
+    if(folga>0 && pool < precisa){ folgaDo[min.id]=0; apertados.push(`${min.nome}: ${pool} pessoas, precisaria de ${precisa}`); }
+    else folgaDo[min.id]=folga;
+  });
+
+  const slots = []; let quebras = 0, vagas = 0;
+
+  /* candidatos livres para um ministério num culto */
+  const aptosPara = (min, d, hoje) => S.membros.filter(m =>
+    m.ativo && m.ministerios.includes(min.id) &&
+    (d.extra || m.disponibilidade.includes(d.cultId)) &&
+    !(umPorDia && hoje.has(m.id)) &&
+    !slots.some(s => s.data===d.data && s.membroId===m.id && s.ministerioId===min.id)
+  );
+
+  datas.forEach(d=>{
+    const hoje = new Set();
+    const fila = ministeriosAlvo.map(min => ({min, falta: min.qtd}));
+
+    /* preenche sempre o ministério mais apertado primeiro:
+       assim quem serve em dois ministérios sobra para onde faz falta */
+    while(fila.some(f=>f.falta>0)){
+      let alvo=null, menorFolga=Infinity;
+      fila.filter(f=>f.falta>0).forEach(f=>{
+        const fM = folgaDo[f.min.id];
+        const livres = aptosPara(f.min, d, hoje).filter(m=>{
+          const desde = ultima[m.id] ? diasEntre(ultima[m.id], d.data) : 999;
+          return !(fM>0 && desde < fM);
+        }).length;
+        const razao = livres / f.falta;
+        if(razao < menorFolga){ menorFolga = razao; alvo = f; }
+      });
+
+      const min = alvo.min, folgaMin = folgaDo[min.id];
+      alvo.falta--;
+      const aptos = aptosPara(min, d, hoje);
+      if(!aptos.length){ slots.push({id:uid(), data:d.data, hora:d.hora, ministerioId:min.id, membroId:null}); vagas++; continue; }
+
+      let melhor=null, melhorNota=Infinity, forcado=false;
+      aptos.forEach(m=>{
+        const desde = ultima[m.id] ? diasEntre(ultima[m.id], d.data) : 999;
+        let nota = noMes[m.id]*1000 - Math.min(desde,60)*4 + totalHist[m.id]*0.6 + Math.random()*0.9;
+        const quebra = folgaMin>0 && desde < folgaMin;
+        if(quebra) nota += 100000;                                   /* folga é regra branda: só quebra se faltar gente */
+        const uMin = ultimaNoMinisterio[m.id+'|'+min.id];
+        if(uMin && diasEntre(uMin, d.data) <= 7) nota += 450;        /* evita repetir a mesma função em cultos seguidos */
+        if(nota < melhorNota){ melhorNota=nota; melhor=m; forcado=quebra; }
+      });
+
+      if(forcado) quebras++;
+      hoje.add(melhor.id);
+      noMes[melhor.id]++; ultima[melhor.id]=d.data; totalHist[melhor.id]++;
+      ultimaNoMinisterio[melhor.id+'|'+min.id]=d.data;
+      slots.push({id:uid(), data:d.data, hora:d.hora, ministerioId:min.id, membroId:melhor.id, forcado});
+    }
+  });
+
+  try{
+    S = await chamarApi('gerarEscala', {mes, geradaEm:hojeISO(), folga, apertados, slots});
+  }catch(e){ aviso('Erro ao salvar a escala: '+e.message); return; }
+  fecharModal();
+  irPara('escala');
+  $('#mesEscala').value = mes;
+  renderEscala();
+  let msg = `Escala de ${nomeMes(mes)} pronta: ${datas.length} cultos, ${slots.length} postos.`;
+  if(vagas) msg += ` ${vagas} posto(s) sem ninguém disponível.`;
+  if(quebras) msg += ` ${quebras} nome(s) entraram antes da folga.`;
+  if(!apertados.length) msg += ' Use "Imprimir Matutino" e "Imprimir Noturno" para gerar os dois relatórios — cada equipe só vê o próprio turno.';
+  aviso(msg);
+  if(apertados.length) mostrarAlertaEquipe(apertados, folga);
+}
+
+function mostrarAlertaEquipe(lista, folga){
+  $('#modalCx').innerHTML = `<h3>A escala saiu, mas alguns ministérios estão sem gente para revezar</h3>
+    <p style="color:var(--texto-2);font-size:13.5px;margin:0 0 14px">
+      Para manter ${folga} dias de folga entre um serviço e outro, cada ministério precisa de um número mínimo de pessoas.
+      Nestes aqui a folga foi liberada — as mesmas pessoas voltam mais cedo:</p>
+    <div style="display:flex;flex-direction:column;gap:7px">${lista.map(x=>
+      `<div style="display:flex;gap:9px;align-items:center;font-size:13.5px"><i class="ponto" style="background:var(--ouro)"></i>${esc(x)}</div>`).join('')}</div>
+    <p style="color:var(--texto-3);font-size:12.5px;margin:15px 0 0">Convide mais gente para esses ministérios ou reduza a quantidade por culto na aba Ministérios.</p>
+    <div class="direita" style="justify-content:flex-end;margin-top:18px">
+      <button class="btn" onclick="fecharModal()">Entendi</button>
+      <button class="btn ouro" onclick="fecharModal();irPara('ministerios')">Ajustar ministérios</button></div>`;
+  $('#modal').classList.add('on');
+}
+
+function renderEscala(){
+  if(!$('#mesEscala').value) $('#mesEscala').value = mesISO();
+  const mes = $('#mesEscala').value; mesAtivo = mes;
+  const e = S.escalas[mes];
+  const saida = $('#escalaSaida');
+
+  if(!e){
+    saida.innerHTML = `<div class="vazio"><b>Nenhuma escala para ${nomeMes(mes)}</b>
+      Confira os dias de culto acima e toque em <b style="display:inline;color:var(--ouro)">Gerar escala</b>. Dá para trocar qualquer nome depois.</div>`;
+    renderEquilibrio('#equilibrioEscala', mes); return;
+  }
+
+  const datas = [...new Set(e.slots.map(s=>s.data))].sort();
+  const banner = (e.apertados && e.apertados.length) ? `<div style="border:1px solid rgba(232,180,74,.5);background:rgba(232,180,74,.09);border-radius:12px;padding:12px 15px;margin-bottom:14px;font-size:13px">
+      <b style="font-family:var(--display)">Folga liberada em ${e.apertados.length} ministério${e.apertados.length===1?'':'s'}</b>
+      <div style="color:var(--texto-2);margin-top:5px">${e.apertados.map(esc).join(' · ')}</div></div>` : '';
+  saida.innerHTML = banner + `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h2 style="font-size:22px;text-transform:capitalize">${nomeMes(mes)}</h2>
+      <span style="font-size:12px;color:var(--texto-3);font-family:var(--mono)">gerada em ${fmt(e.geradaEm)} · ${e.slots.length} postos · folga ${e.folga} dias</span>
+    </div>
+    <div class="grade" style="gap:13px">` + datas.map(d=>{
+      const doDia = e.slots.filter(s=>s.data===d);
+      return `<div class="dia-card">
+        <div class="dia-topo"><b>${fmtLongo(d)}</b><span>${esc(doDia[0].hora||'')}</span></div>
+        <div class="linhas">` + S.ministerios.map(min=>{
+          const ss = doDia.filter(s=>s.ministerioId===min.id);
+          if(!ss.length) return '';
+          return `<div class="linha">
+            <div class="m"><i class="ponto" style="background:${min.cor}"></i>${esc(min.nome)}</div>
+            <div class="pessoas">${ss.map(s=>`
+              <span class="slot ${s.membroId?'':'livre'}" title="${s.forcado?'Entrou antes da folga mínima':''}">
+                ${s.forcado?'<i class="ponto" style="background:var(--ouro)"></i>':''}
+                ${SESSAO.papel==='gestor' ? `
+                <select onchange="trocarSlot('${mes}','${s.id}',this.value)">
+                  <option value="">— a definir —</option>
+                  ${S.membros.filter(m=>m.ativo && m.ministerios.includes(min.id)).sort((a,b)=>a.nome.localeCompare(b.nome))
+                    .map(m=>`<option value="${m.id}" ${s.membroId===m.id?'selected':''}>${esc(m.nome)}</option>`).join('')}
+                </select>` : `<span style="padding:2px 5px;font-size:12.5px">${s.membroId?esc(membro(s.membroId)?.nome||'—'):'— a definir —'}</span>`}
+                </span>`).join('')}</div>
+          </div>`;
+        }).join('') + `</div></div>`;
+    }).join('') + '</div>';
+
+  renderEquilibrio('#equilibrioEscala', mes);
+}
+async function trocarSlot(mes, slotId, membroId){
+  try{
+    S = await chamarApi('trocarSlot', {mes, slotId, membroId});
+    renderEquilibrio('#equilibrioEscala', mes); aviso('Troca registrada.');
+  }catch(e){ aviso('Erro ao trocar: '+e.message); }
+}
+
+function copiarWhats(){
+  const e = S.escalas[mesAtivo]; if(!e){ aviso('Gere a escala antes de copiar.'); return; }
+  let t = `*ESCALA — ${S.config.nome.toUpperCase()}*\n_${nomeMes(mesAtivo).toUpperCase()}_\n`;
+  [...new Set(e.slots.map(s=>s.data))].sort().forEach(d=>{
+    const doDia = e.slots.filter(s=>s.data===d);
+    t += `\n*${fmtLongo(d)} — ${doDia[0].hora||''}*\n`;
+    S.ministerios.forEach(min=>{
+      const nomes = doDia.filter(s=>s.ministerioId===min.id).map(s=> s.membroId ? membro(s.membroId)?.nome : 'a definir');
+      if(nomes.length) t += `• ${min.nome}: ${nomes.join(', ')}\n`;
+    });
+  });
+  t += `\n_Que o Senhor abençoe o nosso serviço._`;
+  navigator.clipboard.writeText(t).then(()=>aviso('Escala copiada — cole no grupo do WhatsApp.'))
+    .catch(()=>{ $('#modalCx').innerHTML=`<h3>Copie o texto</h3><textarea style="min-height:340px">${esc(t)}</textarea>
+      <div class="direita" style="justify-content:flex-end;margin-top:14px"><button class="btn" onclick="fecharModal()">Fechar</button></div>`; $('#modal').classList.add('on'); });
+}
+
+/* ================= PASTOREIO ================= */
+function renderPastoreio(){
+  const ft=$('#filtroPastTipo');
+  if(!ft.options.length) ft.innerHTML='<option value="">Todos os tipos</option>'+TIPOS_PAST.map(t=>`<option>${t}</option>`).join('');
+  const q=($('#buscaPastoreio').value||'').toLowerCase(), t=ft.value, st=$('#filtroPastStatus').value;
+  const lista = S.pastoreio.filter(x=>
+    (!q || x.pessoa.toLowerCase().includes(q) || (x.assunto||'').toLowerCase().includes(q)) &&
+    (!t || x.tipo===t) && (!st || x.status===st)
+  ).sort((a,b)=>(b.data+b.hora).localeCompare(a.data+a.hora));
+
+  if(!lista.length){ $('#tabelaPastoreio').innerHTML=`<div class="vazio"><b>Agenda livre</b>Marque a primeira visita ou aconselhamento do mês.</div>`; return; }
+  const corSt = s => s==='Concluído'?'#23A06B':s==='Remarcar'?'#E07A3B':'#3B6FE0';
+  $('#tabelaPastoreio').innerHTML = `<table><thead><tr>
+      <th>Quando</th><th>Pessoa / família</th><th>Tipo</th><th>Responsável</th><th>Assunto</th><th>Situação</th><th></th>
+    </tr></thead><tbody>` + lista.map(x=>`<tr>
+      <td style="font-family:var(--mono);font-size:12.5px;white-space:nowrap">${fmt(x.data)}<div style="color:var(--texto-3);font-size:11px">${esc(x.hora||'')} · ${DIAS_CURTO[dt(x.data).getDay()]}</div></td>
+      <td style="font-weight:500">${esc(x.pessoa)}</td>
+      <td><span class="tag" style="border-color:#8B5CF655;background:#8B5CF61f">${esc(x.tipo)}</span></td>
+      <td style="color:var(--texto-2)">${esc(x.responsavel||'—')}</td>
+      <td style="color:var(--texto-2);font-size:12.5px;max-width:260px">${esc(x.assunto||'—')}</td>
+      <td><span class="tag" style="border-color:${corSt(x.status)}66;background:${corSt(x.status)}1f">${esc(x.status)}</span></td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn fino" onclick="abrirPastoreio('${x.id}')">Editar</button>
+        ${SESSAO.papel==='gestor'?`<button class="btn fino perigo" onclick="apagarPastoreio('${x.id}')">×</button>`:''}</td>
+    </tr>`).join('') + '</tbody></table>';
+}
+function abrirPastoreio(id){
+  const x = id ? S.pastoreio.find(p=>p.id===id) : {pessoa:'',tipo:'Visita',data:hojeISO(),hora:'19:00',responsavel:'',assunto:'',status:'Agendado',notas:''};
+  $('#modalCx').innerHTML = `<h3>${id?'Editar agendamento':'Novo agendamento'}</h3>
+    <div class="grade g2">
+      <div><label class="f">Pessoa ou família</label><input type="text" id="pPessoa" value="${esc(x.pessoa)}" list="listaMembros"></div>
+      <div><label class="f">Tipo</label><select id="pTipo">${TIPOS_PAST.map(t=>`<option ${x.tipo===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div><label class="f">Data</label><input type="date" id="pData" value="${esc(x.data)}"></div>
+      <div><label class="f">Hora</label><input type="time" id="pHora" value="${esc(x.hora)}"></div>
+      <div><label class="f">Responsável</label><input type="text" id="pResp" value="${esc(x.responsavel)}" placeholder="Pr. / diácono / líder"></div>
+      <div><label class="f">Situação</label><select id="pStatus">${['Agendado','Concluído','Remarcar'].map(s=>`<option ${x.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    </div>
+    <div style="margin-top:13px"><label class="f">Assunto</label><input type="text" id="pAssunto" value="${esc(x.assunto)}" placeholder="Ex.: acompanhamento do casal"></div>
+    <div style="margin-top:13px"><label class="f">Anotações do encontro</label><textarea id="pNotas">${esc(x.notas)}</textarea></div>
+    <datalist id="listaMembros">${S.membros.map(m=>`<option value="${esc(m.nome)}">`).join('')}</datalist>
+    <div class="direita" style="justify-content:flex-end;margin-top:20px">
+      <button class="btn" onclick="fecharModal()">Cancelar</button>
+      <button class="btn ouro" onclick="salvarPastoreio('${id||''}')">Salvar agendamento</button></div>`;
+  $('#modal').classList.add('on');
+}
+async function salvarPastoreio(id){
+  const pessoa=$('#pPessoa').value.trim(); if(!pessoa){ aviso('Informe quem será visitado.'); return; }
+  const d={id: id||undefined, pessoa,tipo:$('#pTipo').value,data:$('#pData').value,hora:$('#pHora').value,
+    responsavel:$('#pResp').value.trim(),status:$('#pStatus').value,assunto:$('#pAssunto').value.trim(),notas:$('#pNotas').value.trim()};
+  try{
+    S = await chamarApi('salvarPastoreio', d);
+    fecharModal(); renderPastoreio(); aviso('Agendamento salvo.');
+  }catch(e){ aviso('Erro ao salvar: '+e.message); }
+}
+async function apagarPastoreio(id){
+  if(!confirm('Excluir este agendamento?')) return;
+  try{ S = await chamarApi('apagarPastoreio', {id}); renderPastoreio(); }
+  catch(e){ aviso('Erro ao excluir: '+e.message); }
+}
+
+/* ================= MÍDIA ================= */
+function ytId(u){ const m=String(u).match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); return m?m[1]:null; }
+function renderMidia(){
+  const q=($('#buscaMidia').value||'').toLowerCase(), f=$('#filtroMidia').value;
+  const lista = S.midia.filter(x=>(!f||x.tipo===f)&&(!q||x.titulo.toLowerCase().includes(q)||(x.tema||'').toLowerCase().includes(q)))
+    .sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  if(!lista.length){ $('#galeria').innerHTML=`<div class="vazio" style="grid-column:1/-1"><b>Acervo vazio</b>Adicione o link de uma pregação no YouTube ou a arte do próximo culto.</div>`; return; }
+  $('#galeria').innerHTML = lista.map(x=>{
+    const y = x.tipo==='Vídeo' ? ytId(x.url) : null;
+    const thumb = y ? `<img src="https://img.youtube.com/vi/${y}/hqdefault.jpg" alt="">`
+      : x.tipo==='Imagem' && x.url ? `<img src="${esc(x.url)}" alt="">` : 'sem prévia';
+    return `<div class="midia">
+      <a class="thumb" href="${esc(x.url)}" target="_blank" rel="noopener">${thumb}</a>
+      <div class="info"><div><b>${esc(x.titulo)}</b><br><small>${esc(x.tipo)}${x.tema?' · '+esc(x.tema):''}${x.data?' · '+fmt(x.data):''}</small></div>
+        ${SESSAO.papel==='gestor'?`<button class="btn fino perigo" onclick="apagarMidia('${x.id}')">×</button>`:''}</div></div>`;
+  }).join('');
+}
+function abrirMidia(){
+  $('#modalCx').innerHTML = `<h3>Adicionar mídia</h3>
+    <div class="grade g2">
+      <div><label class="f">Título</label><input type="text" id="dTitulo" placeholder="Culto de celebração — 12/07"></div>
+      <div><label class="f">Tipo</label><select id="dTipo"><option>Vídeo</option><option>Imagem</option></select></div>
+      <div><label class="f">Tema ou ministério</label><input type="text" id="dTema" placeholder="Pregação, arte, foto do culto"></div>
+      <div><label class="f">Data</label><input type="date" id="dData" value="${hojeISO()}"></div>
+    </div>
+    <div style="margin-top:13px"><label class="f">Link (vídeo do YouTube/Drive, ou imagem)</label><input type="text" id="dUrl" placeholder="https://..."></div>
+    <div style="margin-top:9px"><label class="f">Ou carregue uma imagem (até 8MB — vídeo continua só por link)</label><input type="file" accept="image/*" onchange="enviarImagem(this,'#dUrl')"></div>
+    <div class="direita" style="justify-content:flex-end;margin-top:20px">
+      <button class="btn" onclick="fecharModal()">Cancelar</button>
+      <button class="btn ouro" onclick="salvarMidia()">Adicionar ao acervo</button></div>`;
+  $('#modal').classList.add('on');
+}
+async function salvarMidia(){
+  const titulo=$('#dTitulo').value.trim(); if(!titulo){ aviso('Dê um título para achar depois.'); return; }
+  const url = $('#dUrl').value.trim(); if(!url){ aviso('Cole um link ou carregue uma imagem.'); return; }
+  try{
+    S = await chamarApi('salvarMidia', {titulo,tipo:$('#dTipo').value,tema:$('#dTema').value.trim(),data:$('#dData').value,url});
+    fecharModal(); renderMidia(); aviso('Mídia adicionada.');
+  }catch(e){ aviso('Erro ao salvar: '+e.message); }
+}
+async function apagarMidia(id){
+  try{ S = await chamarApi('apagarMidia', {id}); renderMidia(); }
+  catch(e){ aviso('Erro ao excluir: '+e.message); }
+}
+
+/* ================= DADOS ================= */
+async function salvarConfig(){
+  try{
+    S = await chamarApi('salvarConfig', {
+      nome:$('#cfgNome').value.trim()||'Nossa Igreja', lema:$('#cfgLema').value.trim(),
+      logo:$('#cfgLogo').value.trim(), capa:$('#cfgCapa').value.trim()
+    });
+    renderPainel(); aviso('Identidade atualizada.');
+  }catch(e){ aviso('Erro ao salvar: '+e.message); }
+}
+async function alterarSenha(){
+  const senhaAtual=$('#senhaAtual').value, senhaNova=$('#senhaNova').value;
+  if(!senhaAtual || !senhaNova){ aviso('Preencha a senha atual e a nova senha.'); return; }
+  try{
+    await chamarApi('alterarMinhaSenha', {senhaAtual, senhaNova});
+    $('#senhaAtual').value=''; $('#senhaNova').value='';
+    aviso('Senha alterada.');
+  }catch(e){ aviso('Erro: '+e.message); }
+}
+function baixar(nome, texto, tipo){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([texto],{type:tipo})); a.download=nome; a.click(); URL.revokeObjectURL(a.href);
+}
+function exportarMembrosCSV(){
+  const linhas = [['Nome','Telefone','Nascimento','Ministérios','Disponibilidade','Status']];
+  S.membros.forEach(m=>linhas.push([m.nome,m.telefone,m.nascimento,
+    m.ministerios.map(i=>ministerio(i)?.nome).join(' | '), m.disponibilidade.map(d=>{const c=S.cultos.find(x=>x.id===d); return c?c.nome:d;}).join(' | '), m.ativo?'Ativo':'Inativo']));
+  baixar('membros.csv', '\ufeff'+linhas.map(l=>l.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(';')).join('\n'), 'text/csv');
+  aviso('CSV baixado.');
+}
+/* ================= USUÁRIOS ================= */
+async function renderUsuarios(){
+  let lista;
+  try{ lista = await chamarApi('listarUsuarios', {}); }
+  catch(e){ aviso('Erro ao carregar usuários: '+e.message); return; }
+  if(!lista.length){ $('#tabelaUsuarios').innerHTML = `<div class="vazio"><b>Nenhum usuário</b>Crie o primeiro login de acesso.</div>`; return; }
+  $('#tabelaUsuarios').innerHTML = `<table><thead><tr><th>Nome</th><th>Usuário</th><th>Papel</th><th></th></tr></thead><tbody>` +
+    lista.map(u => `<tr>
+      <td style="font-weight:500">${esc(u.nome)}</td>
+      <td style="font-family:var(--mono);font-size:12.5px">${esc(u.usuario)}</td>
+      <td><span class="tag" style="border-color:${u.papel==='gestor'?'#E8B44A66':'#3B6FE066'};background:${u.papel==='gestor'?'#E8B44A1f':'#3B6FE01f'}">${u.papel==='gestor'?'Gestor':'Cadastro'}</span></td>
+      <td style="text-align:right">${u.usuario===SESSAO.usuario?'':`<button class="btn fino perigo" onclick="apagarUsuario('${u.id}')">Excluir</button>`}</td>
+    </tr>`).join('') + '</tbody></table>';
+}
+function abrirUsuario(){
+  $('#modalCx').innerHTML = `<h3>Novo usuário</h3>
+    <div class="grade g2">
+      <div><label class="f">Nome completo</label><input type="text" id="uNome"></div>
+      <div><label class="f">Login</label><input type="text" id="uLogin" placeholder="sem espaços"></div>
+      <div><label class="f">Senha provisória</label><input type="password" id="uSenha"></div>
+      <div><label class="f">Papel</label><select id="uPapel">
+        <option value="cadastro">Cadastro — só registra e envia arquivos</option>
+        <option value="gestor">Gestor — acesso completo</option></select></div>
+    </div>
+    <div class="direita" style="justify-content:flex-end;margin-top:20px">
+      <button class="btn" onclick="fecharModal()">Cancelar</button>
+      <button class="btn ouro" onclick="salvarUsuario()">Criar usuário</button></div>`;
+  $('#modal').classList.add('on');
+}
+async function salvarUsuario(){
+  const nome=$('#uNome').value.trim(), usuario=$('#uLogin').value.trim(), senha=$('#uSenha').value;
+  if(!nome || !usuario || !senha){ aviso('Preencha nome, login e senha.'); return; }
+  try{
+    await chamarApi('criarUsuario', {nome, usuario, senha, papel:$('#uPapel').value});
+    fecharModal(); renderUsuarios(); aviso('Usuário criado.');
+  }catch(e){ aviso('Erro: '+e.message); }
+}
+async function apagarUsuario(id){
+  if(!confirm('Excluir este usuário? Ele perde o acesso imediatamente.')) return;
+  try{ await chamarApi('apagarUsuario', {id}); renderUsuarios(); aviso('Usuário excluído.'); }
+  catch(e){ aviso('Erro: '+e.message); }
+}
+
+/* ================= INÍCIO ================= */
+function iniciarTela(){
+  $('#cfgNome').value=S.config.nome||''; $('#cfgLema').value=S.config.lema||'';
+  $('#cfgLogo').value=S.config.logo||''; $('#cfgCapa').value=S.config.capa||'';
+  $('#mesEscala').value = mesISO();
+  irPara(vistaAtual);
+}
+(async function(){
+  SESSAO = await carregarSessao();
+  if(SESSAO && SESSAO.token) await entrarNoSistema();
+})();
+</script>
+</body>
+</html>
