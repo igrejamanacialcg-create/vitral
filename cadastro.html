@@ -22,7 +22,12 @@ body{margin:0;background:var(--pf-preto);color:var(--pf-texto);font-family:'Inst
 .pf-cabecalho{display:flex;align-items:center;gap:12px;padding:16px 22px;
   background:var(--pf-azul-1);border-bottom:1px solid var(--pf-borda);position:sticky;top:0;z-index:10}
 .pf-cabecalho img{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:none;background:var(--pf-azul-2)}
-.pf-cabecalho span{font-family:'Fraunces',serif;font-size:19px;font-weight:700}
+.pf-cabecalho img.esconde{display:none}
+/* sem logo cadastrada, mostra as iniciais em vez de um quadrado de imagem quebrada */
+.pf-selo{width:40px;height:40px;border-radius:10px;flex:none;background:var(--pf-acento);
+  display:none;align-items:center;justify-content:center;font-weight:700;font-size:15px;letter-spacing:.02em}
+.pf-selo.on{display:flex}
+.pf-cabecalho span.pf-titulo{font-family:'Fraunces',serif;font-size:19px;font-weight:700}
 
 .pf-corpo{max-width:640px;margin:0 auto;padding:26px 22px 60px}
 .pf-corpo h1{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px}
@@ -81,8 +86,9 @@ input:focus{outline:none;border-color:var(--pf-acento)}
 <body>
 
 <header class="pf-cabecalho">
-  <img id="pfLogo" alt="">
-  <span id="pfNome">Igreja Manancial</span>
+  <img id="pfLogo" class="esconde" alt="">
+  <div class="pf-selo" id="pfSelo">IM</div>
+  <span class="pf-titulo" id="pfNome">Igreja Manancial</span>
 </header>
 
 <div class="pf-corpo">
@@ -157,8 +163,19 @@ async function carregarOpcoes(){
   mostrarCarregando(true);
   try{
     const d = await chamarApiPublica('opcoesPublicas', {});
-    if(d.config.nome) { $('#pfNome').textContent = d.config.nome; document.title = 'Cadastro de Membro — ' + d.config.nome; }
-    if(d.config.logo) $('#pfLogo').src = d.config.logo;
+    if(d.config.nome){
+      $('#pfNome').textContent = d.config.nome;
+      document.title = 'Cadastro de Membro — ' + d.config.nome;
+      $('#pfSelo').textContent = d.config.nome.split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase();
+    }
+    if(d.config.logo){
+      $('#pfLogo').src = d.config.logo;
+      $('#pfLogo').classList.remove('esconde');
+      /* link do Drive pode falhar (permissão/formato) — cai nas iniciais em vez de ícone quebrado */
+      $('#pfLogo').onerror = () => { $('#pfLogo').classList.add('esconde'); $('#pfSelo').classList.add('on'); };
+    } else {
+      $('#pfSelo').classList.add('on');
+    }
 
     $('#pfMinisterios').innerHTML = d.ministerios.map(m => `
       <label class="pf-opcao" data-id="${m.id}">
