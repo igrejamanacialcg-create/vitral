@@ -799,14 +799,28 @@ function proximoCulto(){
   }
   return null;
 }
+/* carrega a imagem fora da tela e só chama onSucesso quando ela de fato veio;
+   até 3 tentativas porque o Drive falha na primeira e responde na segunda */
+function tentarImagem(url, onSucesso, tentativa){
+  tentativa = tentativa || 1;
+  const teste = new Image();
+  const alvo = url + (url.includes('?') ? '&' : '?') + 'r=' + tentativa;
+  teste.onload = () => onSucesso(alvo);
+  teste.onerror = () => { if(tentativa < 3) setTimeout(()=>tentarImagem(url, onSucesso, tentativa+1), 1200*tentativa); };
+  teste.src = alvo;
+}
 function renderPainel(){
   const c=S.config;
   $('#marcaNome').textContent = c.nome;
   $('#heroTitulo').textContent = c.nome;
   $('#heroEyebrow').textContent = c.lema || 'Casa de oração';
-  $('#selo').innerHTML = c.logo ? `<img src="${esc(c.logo)}" alt="">` : iniciais(c.nome);
+  /* o thumbnail do Drive costuma falhar na 1ª requisição (gerando cache) e funcionar na 2ª —
+     por isso mostra as iniciais e troca pela logo só quando ela realmente carregar */
+  $('#selo').innerHTML = iniciais(c.nome);
+  if(c.logo) tentarImagem(c.logo, url => { $('#selo').innerHTML = `<img src="${esc(url)}" alt="">`; });
   const capa=$('#heroCapa');
-  if(c.capa){ capa.src=c.capa; capa.classList.remove('esconde'); } else capa.classList.add('esconde');
+  if(c.capa) tentarImagem(c.capa, url => { capa.src=url; capa.classList.remove('esconde'); });
+  else capa.classList.add('esconde');
 
   const p = proximoCulto();
   $('#proxDia').textContent = p ? fmt(p.data) : '—';

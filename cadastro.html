@@ -159,6 +159,19 @@ async function chamarApiPublica(acao, dados){
 }
 function escHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+/* o endpoint de thumbnail do Drive costuma falhar na PRIMEIRA requisição (enquanto gera o cache
+   da miniatura) e funcionar na segunda — por isso tenta de novo antes de cair nas iniciais */
+function carregarLogo(url, tentativa){
+  tentativa = tentativa || 1;
+  const img = $('#pfLogo');
+  img.onload = () => { img.classList.remove('esconde'); $('#pfSelo').classList.remove('on'); };
+  img.onerror = () => {
+    img.classList.add('esconde'); $('#pfSelo').classList.add('on');
+    if(tentativa < 3) setTimeout(()=>carregarLogo(url, tentativa+1), 1200*tentativa);
+  };
+  img.src = url + (url.includes('?') ? '&' : '?') + 'r=' + tentativa;
+}
+
 async function carregarOpcoes(){
   mostrarCarregando(true);
   try{
@@ -168,14 +181,8 @@ async function carregarOpcoes(){
       document.title = 'Cadastro de Membro — ' + d.config.nome;
       $('#pfSelo').textContent = d.config.nome.split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase();
     }
-    if(d.config.logo){
-      $('#pfLogo').src = d.config.logo;
-      $('#pfLogo').classList.remove('esconde');
-      /* link do Drive pode falhar (permissão/formato) — cai nas iniciais em vez de ícone quebrado */
-      $('#pfLogo').onerror = () => { $('#pfLogo').classList.add('esconde'); $('#pfSelo').classList.add('on'); };
-    } else {
-      $('#pfSelo').classList.add('on');
-    }
+    if(d.config.logo) carregarLogo(d.config.logo);
+    else $('#pfSelo').classList.add('on');
 
     $('#pfMinisterios').innerHTML = d.ministerios.map(m => `
       <label class="pf-opcao" data-id="${m.id}">
