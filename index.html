@@ -898,20 +898,23 @@ function renderMembros(){
         }).join('') || '<span style="color:var(--texto-3)">—</span>'}</div></td>
       <td style="font-size:12px;color:var(--texto-2)">${m.disponibilidade.map(d=>{const c=S.cultos.find(x=>x.id===d); return c?c.nome:d;}).join(' · ')||'—'}</td>
       <td style="font-family:var(--mono);font-size:12.5px">${h[m.id]?.total||0}${h[m.id]?.ultima?`<div style="font-size:11px;color:var(--texto-3)">últ. ${fmt(h[m.id].ultima)}</div>`:''}</td>
-      <td>${m.ativo?'<span class="tag" style="border-color:#23A06B66;background:#23A06B1f">Ativo</span>':'<span class="tag" style="border-color:#6E77A866;color:var(--texto-3)">Inativo</span>'}</td>
+      <td>${m.ativo?'<span class="tag" style="border-color:#23A06B66;background:#23A06B1f">Ativo</span>':'<span class="tag" style="border-color:#E04E5C99;background:#E04E5C22;color:#F0A0A5">Inativo</span>'}</td>
       <td style="text-align:right;white-space:nowrap">
+        ${!m.ativo && SESSAO.papel==='gestor'?`<button class="btn fino ouro" onclick="habilitarMembro('${m.id}')">Habilitar</button>`:''}
         <button class="btn fino" onclick="abrirMembro('${m.id}')">Editar</button>
         ${SESSAO.papel==='gestor'?`<button class="btn fino perigo" onclick="apagarMembro('${m.id}')">Excluir</button>`:''}</td>
     </tr>`}).join('') + '</tbody></table>';
 }
 
 function abrirMembro(id){
-  const m = id ? membro(id) : {id:'', nome:'', telefone:'', foto:'', nascimento:'', conjuge:'', ministerios:[], disponibilidade:S.cultos.map(c=>c.id), ativo:true, obs:''};
+  const m = id ? membro(id) : {id:'', nome:'', telefone:'', foto:'', nascimento:'', conjuge:'', endereco:'', email:'', ministerios:[], disponibilidade:S.cultos.map(c=>c.id), ativo:true, obs:''};
   $('#modalCx').innerHTML = `
     <h3>${id?'Editar membro':'Novo membro'}</h3>
     <div class="grade g2">
       <div><label class="f">Nome completo</label><input type="text" id="fNome" value="${esc(m.nome)}"></div>
       <div><label class="f">WhatsApp</label><input type="tel" id="fTel" value="${esc(m.telefone)}" placeholder="(67) 9 9999-0000"></div>
+      <div><label class="f">Endereço</label><input type="text" id="fEndereco" value="${esc(m.endereco||'')}"></div>
+      <div><label class="f">E-mail</label><input type="text" id="fEmail" value="${esc(m.email||'')}"></div>
       <div><label class="f">Aniversário</label><input type="date" id="fNasc" value="${esc(m.nascimento)}"></div>
       <div><label class="f">Link da foto</label><input type="text" id="fFoto" value="${esc(m.foto)}" placeholder="https://..."></div>
     </div>
@@ -947,7 +950,7 @@ async function salvarMembro(id){
   if(!nome){ aviso('Escreva o nome do membro para salvar.'); return; }
   const dados = {
     id: id||undefined, nome, telefone:$('#fTel').value.trim(), foto:$('#fFoto').value.trim(), nascimento:$('#fNasc').value,
-    conjuge:$('#fConjuge').value.trim(),
+    conjuge:$('#fConjuge').value.trim(), endereco:$('#fEndereco').value.trim(), email:$('#fEmail').value.trim(),
     ministerios:[...$('#fMins').querySelectorAll('input:checked')].map(i=>i.value),
     disponibilidade:[...$('#fCultos').querySelectorAll('input:checked')].map(i=>i.value),
     ativo:$('#fAtivo').value==='1', obs:$('#fObs').value.trim()
@@ -962,13 +965,25 @@ async function apagarMembro(id){
   try{ S = await chamarApi('apagarMembro', {id}); renderMembros(); aviso('Membro excluído.'); }
   catch(e){ aviso('Erro ao excluir: '+e.message); }
 }
+/* libera quem se autocadastrou pelo formulário público: entra inativo e só concorre à escala
+   depois que o gestor confere e habilita aqui */
+async function habilitarMembro(id){
+  const m = membro(id); if(!m) return;
+  if(!confirm(`Habilitar ${m.nome} para entrar nas escalas?`)) return;
+  try{
+    S = await chamarApi('salvarMembro', Object.assign({}, m, {ativo:true}));
+    renderMembros(); aviso(`${m.nome.split(' ')[0]} habilitado.`);
+  }catch(e){ aviso('Erro ao habilitar: '+e.message); }
+}
 function fecharModal(){ $('#modal').classList.remove('on'); }
 $('#modal').onclick = e => { if(e.target.id==='modal') fecharModal(); };
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') fecharModal(); });
 
 function abrirMinisterioModal(ministerioId, ministerioNome){
   const m = S.ministerios.find(x=>x.id===ministerioId);
-  const ativos = S.membros.filter(x=>x.ativo && x.ministerios.includes(ministerioId));
+  const inscritos = S.membros.filter(x=>x.ministerios.includes(ministerioId));
+  const ativos = inscritos.filter(x=>x.ativo);
+  const pendentes = inscritos.filter(x=>!x.ativo);
   const escalasDoMes = S.escalas[mesISO()] || {slots:[]};
   const escaladosEssMes = escalasDoMes.slots.filter(s=>s.ministerioId===ministerioId && s.membroId);
 
@@ -986,7 +1001,20 @@ function abrirMinisterioModal(ministerioId, ministerioNome){
 
         <div id="abaRelatorio" class="aba-conteudo">
           <h3>Escala de ${esc(ministerioNome)} - ${mesISO()}</h3>
-          <p><b>Inscritos:</b> ${ativos.length} (precisa de ${m.qtd})</p>
+          <p><b>Inscritos:</b> ${ativos.length} (precisa de ${m.qtd})${pendentes.length?` · <span style="color:#F0A0A5">${pendentes.length} aguardando liberação</span>`:''}</p>
+          <div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 16px">
+            ${inscritos.length ? inscritos.map(mem=>`
+              <div style="display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:9px;
+                background:${mem.ativo?'rgba(35,160,107,.10)':'rgba(224,78,92,.13)'};
+                border:1px solid ${mem.ativo?'#23A06B44':'#E04E5C66'}">
+                <span style="flex:1;font-size:13.5px">${esc(nomeExibicao(mem))}</span>
+                ${mem.ativo
+                  ? '<span class="tag" style="border-color:#23A06B66;background:#23A06B1f">Ativo</span>'
+                  : `<span class="tag" style="border-color:#E04E5C99;background:#E04E5C22;color:#F0A0A5">Inativo</span>
+                     ${SESSAO.papel==='gestor'?`<button class="btn fino ouro" onclick="habilitarMembro('${mem.id}');fecharModal()">Habilitar</button>`:''}`}
+              </div>`).join('')
+            : '<p style="color:var(--texto-3);font-size:13px">Ninguém inscrito neste ministério ainda.</p>'}
+          </div>
           <p><b>Escalados neste mês:</b> ${escaladosEssMes.length}</p>
           <ul>${escaladosEssMes.map(s=>{
             const mem = membro(s.membroId);

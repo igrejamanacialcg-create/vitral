@@ -18,7 +18,9 @@ const CAB = {
   Config: ['chave','valor'],
   Ministerios: ['id','nome','qtd','cor'],
   Cultos: ['id','nome','tipo','diaSemanai','hora','data'],
-  Membros: ['id','nome','telefone','foto','nascimento','ministerios','disponibilidade','ativo','obs','conjuge'],
+  /* endereco/email no fim de propósito — mesmo truque do conjuge, pra não deslocar colunas
+     numa planilha já em uso: se adicionar campo novo no futuro, sempre no fim */
+  Membros: ['id','nome','telefone','foto','nascimento','ministerios','disponibilidade','ativo','obs','conjuge','endereco','email'],
   Escalas: ['mes','geradaEm','folga','apertados'],
   Slots: ['id','mes','data','hora','ministerioId','membroId','forcado'],
   Pastoreio: ['id','pessoa','tipo','data','hora','responsavel','status','assunto','notas'],
@@ -250,6 +252,7 @@ function carregarTudo(){
   }));
   const membros = linhasComoObjetos('Membros').map(m => ({
     id:m.id, nome:m.nome, telefone:m.telefone, foto:m.foto, nascimento:m.nascimento, conjuge:m.conjuge||'',
+    endereco:m.endereco||'', email:m.email||'',
     ministerios: String(m.ministerios||'').split(',').map(s=>s.trim()).filter(Boolean),
     disponibilidade: String(m.disponibilidade||'').split(',').map(s=>s.trim()).filter(Boolean),
     ativo: Number(m.ativo) === 1, obs: m.obs
@@ -280,6 +283,7 @@ function salvarMembro(dados){
   const registro = {
     id: dados.id || Utilities.getUuid(), nome: dados.nome, telefone: dados.telefone||'',
     foto: dados.foto||'', nascimento: dados.nascimento||'', conjuge: dados.conjuge||'',
+    endereco: dados.endereco||'', email: dados.email||'',
     ministerios: (dados.ministerios||[]).join(','), disponibilidade: (dados.disponibilidade||[]).join(','),
     ativo: dados.ativo ? 1 : 0, obs: dados.obs||''
   };
@@ -300,20 +304,23 @@ function opcoesPublicas(){
     ministerios, cultos
   };
 }
-/* grava direto na mesma aba Membros que o sistema interno usa — sempre cria (nunca edita),
-   já entra ativo:1 pra aparecer na próxima geração de escala */
+/* grava direto na mesma aba Membros que o sistema interno usa — sempre cria (nunca edita).
+   Quem NÃO quer servir entra ativo:1 (é só membro, nada pra aprovar). Quem MARCOU ministério(s)
+   entra ativo:0 (pendente) — o gestor precisa habilitar manualmente antes de concorrer escala. */
 function cadastroPublico(dados){
   if(!dados.nome) throw new Error('Informe seu nome completo.');
   if(!dados.telefone) throw new Error('Informe seu WhatsApp.');
-  if(!Array.isArray(dados.ministerios) || !dados.ministerios.length) throw new Error('Selecione ao menos um setor de interesse.');
+  const ministerios = (Array.isArray(dados.ministerios) ? dados.ministerios : []).slice(0,3);
   const registro = {
     id: Utilities.getUuid(), nome: dados.nome, telefone: dados.telefone,
     foto:'', nascimento: dados.nascimento||'', conjuge: dados.conjuge||'',
-    ministerios: dados.ministerios.join(','), disponibilidade: (dados.disponibilidade||[]).join(','),
-    ativo: 1, obs: 'Autocadastro pelo formulário público em ' + new Date().toISOString().slice(0,10)
+    endereco: dados.endereco||'', email: dados.email||'',
+    ministerios: ministerios.join(','), disponibilidade: '',
+    ativo: ministerios.length ? 0 : 1,
+    obs: 'Autocadastro pelo formulário público em ' + new Date().toISOString().slice(0,10)
   };
   gravarLinha('Membros', CAB.Membros, registro);
-  return {nome: dados.nome};
+  return {nome: dados.nome, pendente: ministerios.length > 0};
 }
 
 /* ================= MINISTÉRIOS ================= */

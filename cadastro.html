@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quero Servir — Cadastro de Voluntário</title>
+<title>Cadastro de Membro — Igreja Manancial</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap');
 
@@ -12,54 +12,65 @@
   --pf-cinza:#5c6779; --pf-cinza-claro:#8892a3;
   --pf-texto:#eef1f6; --pf-texto-2:#aab3c2;
   --pf-acento:#3b6fe0; --pf-acento-claro:#6f97e8;
+  --pf-verde:#23a06b; --pf-vermelho:#e0777a;
   --pf-borda:rgba(255,255,255,.10);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--pf-preto);color:var(--pf-texto);font-family:'Instrument Sans',Arial,sans-serif;
   -webkit-font-smoothing:antialiased}
-.pf-topo{position:relative;min-height:280px;display:flex;align-items:flex-end;overflow:hidden;
-  background:linear-gradient(160deg,var(--pf-azul-2),var(--pf-preto) 70%)}
-.pf-topo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 8%;opacity:.35}
-.pf-topo .veu{position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(5,7,13,.55) 0%,rgba(5,7,13,.75) 55%,var(--pf-preto) 100%)}
-.pf-topo .dentro{position:relative;padding:34px 22px 26px;width:100%;max-width:640px;margin:0 auto}
-.pf-eyebrow{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--pf-acento-claro);font-weight:600;margin-bottom:8px}
-.pf-topo h1{font-family:'Fraunces',serif;font-size:30px;margin:0 0 6px;line-height:1.1}
-.pf-topo p{margin:0;color:var(--pf-texto-2);font-size:14px}
+
+.pf-cabecalho{display:flex;align-items:center;gap:12px;padding:16px 22px;
+  background:var(--pf-azul-1);border-bottom:1px solid var(--pf-borda);position:sticky;top:0;z-index:10}
+.pf-cabecalho img{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:none;background:var(--pf-azul-2)}
+.pf-cabecalho span{font-family:'Fraunces',serif;font-size:19px;font-weight:700}
 
 .pf-corpo{max-width:640px;margin:0 auto;padding:26px 22px 60px}
+.pf-corpo h1{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px}
+.pf-corpo .sub{color:var(--pf-texto-2);font-size:13.5px;margin:0 0 20px}
 .pf-cartao{background:var(--pf-azul-1);border:1px solid var(--pf-borda);border-radius:16px;padding:22px}
-.pf-secao{margin-bottom:22px}
-.pf-secao h2{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--pf-acento-claro);margin:0 0 4px}
-.pf-secao .sub{font-size:12.5px;color:var(--pf-texto-2);margin:0 0 14px}
 
-label.pf-campo{display:block;font-size:12.5px;color:var(--pf-texto-2);margin:12px 0 5px;font-weight:600}
-input[type=text],input[type=tel],input[type=date]{
+label.pf-campo{display:block;font-size:12.5px;color:var(--pf-texto-2);margin:14px 0 5px;font-weight:600}
+label.pf-campo:first-child{margin-top:0}
+input[type=text],input[type=tel],input[type=date],input[type=email]{
   width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--pf-borda);
   background:var(--pf-azul-2);color:var(--pf-texto);font-size:14.5px;font-family:inherit
 }
 input:focus{outline:none;border-color:var(--pf-acento)}
-.pf-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:6px}
+
+.pf-pergunta{margin-top:22px;padding-top:20px;border-top:1px solid var(--pf-borda)}
+.pf-pergunta h2{font-size:15.5px;margin:0 0 12px}
+.pf-toggle{display:flex;gap:10px}
+.pf-toggle button{flex:1;padding:13px;border-radius:11px;border:1px solid var(--pf-borda);
+  background:var(--pf-azul-2);color:var(--pf-texto);font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.pf-toggle button.on{border-color:var(--pf-acento);background:var(--pf-acento)}
+.pf-toggle button[data-v="nao"].on{border-color:var(--pf-cinza-claro);background:var(--pf-azul-3)}
+
+.pf-ministerios{display:none;margin-top:16px}
+.pf-ministerios.on{display:block}
+.pf-ministerios .sub{margin:0 0 4px}
+.pf-limite{font-size:12px;color:var(--pf-acento-claro);margin-bottom:10px}
+.pf-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .pf-opcao{display:flex;align-items:center;gap:8px;background:var(--pf-azul-2);border:1px solid var(--pf-borda);
   border-radius:10px;padding:10px 11px;cursor:pointer;transition:.15s}
-.pf-opcao:has(input:checked){border-color:var(--pf-acento);background:var(--pf-azul-3)}
+.pf-opcao.on{border-color:var(--pf-acento);background:var(--pf-azul-3)}
+.pf-opcao.desabilitada{opacity:.4;cursor:not-allowed}
 .pf-opcao input{accent-color:var(--pf-acento);width:16px;height:16px;flex:none}
 .pf-opcao span{font-size:13.5px;color:var(--pf-texto)}
 
-.pf-botao{width:100%;margin-top:10px;padding:14px;border:none;border-radius:11px;
+.pf-botao{width:100%;margin-top:20px;padding:14px;border:none;border-radius:11px;
   background:var(--pf-acento);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
 .pf-botao:hover{background:var(--pf-acento-claro)}
 .pf-botao:disabled{opacity:.5;cursor:default}
-.pf-erro{color:#e0777a;font-size:13px;margin-top:10px;min-height:1em}
+.pf-erro{color:var(--pf-vermelho);font-size:13px;margin-top:10px;min-height:1em}
 .pf-rodape{text-align:center;color:var(--pf-cinza);font-size:11.5px;margin-top:18px}
 
 .pf-sucesso{display:none;text-align:center;padding:50px 22px}
 .pf-sucesso.on{display:block}
-.pf-sucesso .marca{width:56px;height:56px;border-radius:50%;background:var(--pf-acento);
+.pf-sucesso .marca{width:56px;height:56px;border-radius:50%;background:var(--pf-verde);
   display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
 .pf-sucesso h2{font-family:'Fraunces',serif;font-size:22px;margin:0 0 8px}
 .pf-sucesso p{color:var(--pf-texto-2);font-size:14px}
-.pf-form.esconde,.pf-sucesso:not(.on){display:none}
+.pf-form.esconde{display:none}
 
 .pf-carregando{position:fixed;inset:0;background:rgba(5,7,13,.7);display:none;align-items:center;justify-content:center;z-index:50}
 .pf-carregando.on{display:flex}
@@ -69,56 +80,54 @@ input:focus{outline:none;border-color:var(--pf-acento)}
 </head>
 <body>
 
-<div class="pf-topo">
-  <img id="pfCapa" alt="">
-  <div class="veu"></div>
-  <div class="dentro">
-    <div class="pf-eyebrow" id="pfLema">Casa de oração</div>
-    <h1 id="pfNome">Igreja Manancial</h1>
-    <p>Quero servir — cadastro de voluntário</p>
-  </div>
-</div>
+<header class="pf-cabecalho">
+  <img id="pfLogo" alt="">
+  <span id="pfNome">Igreja Manancial</span>
+</header>
 
 <div class="pf-corpo">
+  <h1>Cadastro de Membro</h1>
+  <p class="sub">Preencha seus dados — é rapidinho.</p>
+
   <div class="pf-cartao">
-
     <form class="pf-form" id="pfForm">
-      <div class="pf-secao">
-        <h2>Seus dados</h2>
-        <p class="sub">Preencha com calma — é rapidinho.</p>
-        <label class="pf-campo">Nome completo *</label>
-        <input type="text" id="pfNomeCompleto" placeholder="Seu nome completo">
-        <label class="pf-campo">WhatsApp *</label>
-        <input type="tel" id="pfTelefone" placeholder="(67) 9 9999-0000">
-        <label class="pf-campo">Aniversário (opcional)</label>
-        <input type="date" id="pfNascimento">
-        <label class="pf-campo">Cônjuge (se casado — para servir junto, ex. Recepção)</label>
-        <input type="text" id="pfConjuge" placeholder="Nome do(a) cônjuge">
-      </div>
+      <label class="pf-campo">Nome completo *</label>
+      <input type="text" id="pfNomeCompleto" placeholder="Seu nome completo">
+      <label class="pf-campo">WhatsApp *</label>
+      <input type="tel" id="pfTelefone" placeholder="(67) 9 9999-0000">
+      <label class="pf-campo">Endereço</label>
+      <input type="text" id="pfEndereco" placeholder="Rua, número, bairro">
+      <label class="pf-campo">Data de nascimento</label>
+      <input type="date" id="pfNascimento">
+      <label class="pf-campo">E-mail</label>
+      <input type="email" id="pfEmail" placeholder="seu@email.com">
+      <label class="pf-campo">Cônjuge (se casado)</label>
+      <input type="text" id="pfConjuge" placeholder="Nome completo do(a) cônjuge">
 
-      <div class="pf-secao">
-        <h2>Setores de interesse</h2>
-        <p class="sub">Marque em quais você gostaria de servir. Pode marcar mais de um.</p>
-        <div class="pf-grade" id="pfMinisterios"></div>
-      </div>
+      <div class="pf-pergunta">
+        <h2>Gostaria de servir em algum ministério?</h2>
+        <div class="pf-toggle">
+          <button type="button" data-v="sim" onclick="escolherServir(true)">Sim</button>
+          <button type="button" data-v="nao" onclick="escolherServir(false)">Não</button>
+        </div>
 
-      <div class="pf-secao">
-        <h2>Cultos que você pode participar</h2>
-        <p class="sub">Marque os dias/horários em que costuma estar disponível.</p>
-        <div class="pf-grade" id="pfCultos"></div>
+        <div class="pf-ministerios" id="pfBlocoMinisterios">
+          <p class="sub" style="margin-top:14px">Selecione até 3 setores de interesse.</p>
+          <div class="pf-limite" id="pfLimite"></div>
+          <div class="pf-grade" id="pfMinisterios"></div>
+          <button type="button" class="pf-botao" id="pfBotaoSalvar" onclick="enviarCadastro()">Salvar cadastro</button>
+        </div>
       </div>
 
       <div class="pf-erro" id="pfErro"></div>
-      <button type="button" class="pf-botao" id="pfBotao" onclick="enviarCadastro()">Enviar cadastro</button>
-      <div class="pf-rodape">Seus dados vão direto para a equipe de escala — não são compartilhados fora da igreja.</div>
+      <div class="pf-rodape">Seus dados vão direto para a equipe da igreja — não são compartilhados fora dela.</div>
     </form>
 
     <div class="pf-sucesso" id="pfSucesso">
       <div class="marca">✓</div>
       <h2>Cadastro recebido!</h2>
-      <p id="pfSucessoTexto">Obrigado por se colocar à disposição. A equipe vai entrar em contato.</p>
+      <p id="pfSucessoTexto">Obrigado! Recebemos seu cadastro.</p>
     </div>
-
   </div>
 </div>
 
@@ -127,7 +136,9 @@ input:focus{outline:none;border-color:var(--pf-acento)}
 <script>
 /* mesma API do sistema principal — este formulário não exige login, só chama ações públicas */
 const API_URL = 'https://script.google.com/macros/s/AKfycbwWyrQUuAhVFnE5xbz4291lFO8ySqKxOqKuuRwUfPAXs4elBXutLTl_dUR3thzZNFw/exec';
+const LIMITE_MINISTERIOS = 3;
 const $ = s => document.querySelector(s);
+let querServir = null;
 
 function mostrarCarregando(on){ $('#pfCarregando').classList.toggle('on', on); }
 
@@ -140,56 +151,93 @@ async function chamarApiPublica(acao, dados){
   if(json.erro) throw new Error(json.erro);
   return json.dados;
 }
+function escHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 async function carregarOpcoes(){
   mostrarCarregando(true);
   try{
     const d = await chamarApiPublica('opcoesPublicas', {});
-    if(d.config.nome) $('#pfNome').textContent = d.config.nome;
-    if(d.config.lema) $('#pfLema').textContent = d.config.lema;
-    if(d.config.capa) $('#pfCapa').src = d.config.capa;
+    if(d.config.nome) { $('#pfNome').textContent = d.config.nome; document.title = 'Cadastro de Membro — ' + d.config.nome; }
+    if(d.config.logo) $('#pfLogo').src = d.config.logo;
 
     $('#pfMinisterios').innerHTML = d.ministerios.map(m => `
-      <label class="pf-opcao"><input type="checkbox" value="${m.id}"><span>${escHtml(m.nome)}</span></label>
-    `).join('');
-
-    $('#pfCultos').innerHTML = d.cultos.map(c => `
-      <label class="pf-opcao"><input type="checkbox" value="${c.id}"><span>${escHtml(c.nome)}${c.hora?' · '+c.hora:''}</span></label>
+      <label class="pf-opcao" data-id="${m.id}">
+        <input type="checkbox" value="${m.id}" onchange="alternarMinisterio(this)"><span>${escHtml(m.nome)}</span>
+      </label>
     `).join('');
   }catch(e){
     $('#pfErro').textContent = 'Não foi possível carregar o formulário. Recarregue a página.';
   }
   mostrarCarregando(false);
 }
-function escHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function escolherServir(sim){
+  querServir = sim;
+  $('.pf-toggle button[data-v="sim"]').classList.toggle('on', sim===true);
+  $('.pf-toggle button[data-v="nao"]').classList.toggle('on', sim===false);
+  $('#pfBlocoMinisterios').classList.toggle('on', sim===true);
+  $('#pfErro').textContent = '';
+  if(sim === false) enviarCadastro();
+}
+
+function ministeriosMarcados(){ return [...document.querySelectorAll('#pfMinisterios input:checked')]; }
+function alternarMinisterio(input){
+  const marcados = ministeriosMarcados();
+  if(marcados.length > LIMITE_MINISTERIOS){
+    input.checked = false;
+    $('#pfLimite').textContent = `Você já marcou o máximo de ${LIMITE_MINISTERIOS} setores.`;
+    return;
+  }
+  input.closest('.pf-opcao').classList.toggle('on', input.checked);
+  atualizarLimite();
+}
+function atualizarLimite(){
+  const n = ministeriosMarcados().length;
+  $('#pfLimite').textContent = n ? `${n} de ${LIMITE_MINISTERIOS} selecionados` : '';
+  document.querySelectorAll('#pfMinisterios .pf-opcao').forEach(op=>{
+    const input = op.querySelector('input');
+    op.classList.toggle('desabilitada', n>=LIMITE_MINISTERIOS && !input.checked);
+  });
+}
+
+function validarDadosBasicos(){
+  const nome = $('#pfNomeCompleto').value.trim();
+  const telefone = $('#pfTelefone').value.trim();
+  if(!nome) return 'Informe seu nome completo.';
+  if(!telefone) return 'Informe seu WhatsApp.';
+  return '';
+}
 
 async function enviarCadastro(){
   const erroEl = $('#pfErro'); erroEl.textContent='';
-  const nome = $('#pfNomeCompleto').value.trim();
-  const telefone = $('#pfTelefone').value.trim();
-  const ministerios = [...document.querySelectorAll('#pfMinisterios input:checked')].map(i=>i.value);
-  const disponibilidade = [...document.querySelectorAll('#pfCultos input:checked')].map(i=>i.value);
+  const erroBasico = validarDadosBasicos();
+  if(erroBasico){ erroEl.textContent = erroBasico; return; }
+  if(querServir === null){ erroEl.textContent = 'Responda se gostaria de servir em algum ministério.'; return; }
 
-  if(!nome){ erroEl.textContent='Informe seu nome completo.'; return; }
-  if(!telefone){ erroEl.textContent='Informe seu WhatsApp.'; return; }
-  if(!ministerios.length){ erroEl.textContent='Selecione ao menos um setor de interesse.'; return; }
+  const ministerios = querServir ? ministeriosMarcados().map(i=>i.value) : [];
+  if(querServir && !ministerios.length){ erroEl.textContent = 'Selecione ao menos um setor de interesse.'; return; }
 
-  $('#pfBotao').disabled = true;
+  $('#pfBotaoSalvar').disabled = true;
   mostrarCarregando(true);
   try{
     const r = await chamarApiPublica('cadastroPublico', {
-      nome, telefone,
+      nome: $('#pfNomeCompleto').value.trim(),
+      telefone: $('#pfTelefone').value.trim(),
+      endereco: $('#pfEndereco').value.trim(),
       nascimento: $('#pfNascimento').value,
+      email: $('#pfEmail').value.trim(),
       conjuge: $('#pfConjuge').value.trim(),
-      ministerios, disponibilidade
+      ministerios
     });
-    $('#pfSucessoTexto').textContent = `Obrigado, ${r.nome.split(' ')[0]}! Recebemos seu cadastro e a equipe vai entrar em contato.`;
+    $('#pfSucessoTexto').textContent = r.pendente
+      ? `Obrigado, ${r.nome.split(' ')[0]}! Seu cadastro foi recebido e está aguardando liberação da equipe para entrar nas escalas.`
+      : `Obrigado, ${r.nome.split(' ')[0]}! Seu cadastro foi recebido.`;
     $('#pfForm').classList.add('esconde');
     $('#pfSucesso').classList.add('on');
   }catch(e){
     erroEl.textContent = e.message || 'Não foi possível enviar. Tente novamente.';
   }
-  $('#pfBotao').disabled = false;
+  $('#pfBotaoSalvar').disabled = false;
   mostrarCarregando(false);
 }
 
