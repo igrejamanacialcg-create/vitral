@@ -4,32 +4,39 @@ Sistema de gestão para igreja local (Manancial): cadastro de membros, escala me
 automática por ministério, agenda de pastoreio e acervo de mídia. Acessível de qualquer
 lugar, com login por usuário e senha e dois níveis de acesso.
 
-## ⏳ PENDÊNCIA DESTA SESSÃO — leia antes de continuar
+## 🌐 NO AR (2026-07-29) — sistema publicado, tudo aplicado e testado
 
-O frontend (`index.html`) e o `apps_script/Codigo.gs` locais já têm as mudanças abaixo
-implementadas, mas **o usuário ainda não aplicou no ambiente real** (planilha + Apps Script
-publicado). Antes de assumir que algo funciona, confirme que ele já fez isso:
+O sistema **está publicado e funcionando de qualquer lugar**. Não há pendência de aplicação:
+planilha, Apps Script e GitHub Pages estão todos sincronizados e testados ponta a ponta.
 
-1. Adicionar a coluna **`conjuge`** na aba **Membros** da planilha (na próxima coluna livre
-   depois de "obs" — o campo foi colocado no fim de propósito para não deslocar colunas
-   existentes).
-2. Colar o `apps_script/Codigo.gs` atualizado no editor do Apps Script (Ctrl+A → colar → 💾).
-3. Reimplantar: **Implantar → Gerenciar implantações → editar (lápis) → Nova versão →
-   Implantar**.
+| O quê | Onde |
+|---|---|
+| Sistema (login) | `https://igrejamanacialcg-create.github.io/vitral/` |
+| Formulário público de autocadastro | `https://igrejamanacialcg-create.github.io/vitral/cadastro.html` |
+| Repositório (público) | `https://github.com/igrejamanacialcg-create/vitral` |
 
-Depois disso, falta **testar de ponta a ponta**: cadastrar um membro com cônjuge, abrir
-"Gerar escala" (modal novo, ver seção Roadmap), gerar, e imprimir (relatório novo com logo
-Manancial + tons azul/verde/preto + assinatura "Bispa Claudia").
+Conta GitHub `igrejamanacialcg-create` foi criada **só para a igreja**, separada da pessoal do
+usuário. O push exigiu apagar a credencial antiga do Windows
+(`cmdkey /delete:LegacyGeneric:target=git:https://github.com`) — se der erro 403 no push de
+novo, é isso.
 
-Também pendente do pedido do usuário, ainda não iniciado:
-- Mudar layout geral do sistema (o pedido foi feito, mas o que já existe — mosaico de
-  ministérios clicável, modal com abas — foi validado e elogiado; não redesenhar do zero
-  sem perguntar o que exatamente trocar)
-- Inserir fotos da igreja na interface
-- Bloco de gestão financeira (dízimos e ofertas) — ainda não começado
-- Bloco do retiro **Toca dos Leões** — usuário disse que vai detalhar como funciona antes de
-  implementar, não adivinhar a estrutura
-- PWA (app de celular) — decidido o caminho (manifest.json + service worker), não implementado
+**Fluxo de publicação de mudança no frontend:** editar → `git add` → `commit` → `push`. O
+GitHub Pages atualiza em ~1 min. Só mexeu no `index.html`/`cadastro.html`? Não precisa
+reimplantar Apps Script. Mexeu no `Codigo.gs`? Aí sim precisa colar no editor + Nova versão.
+
+### ⚠️ Pendências reais
+- **Senha do gestor ainda é `trocar123`** (padrão de instalação, documentada no DEPLOY.md que
+  está num repositório PÚBLICO). Já foi alertado ao usuário mais de uma vez; ele ainda não
+  trocou. Lembrar em **Dados → Minha senha**.
+- Existe um membro de teste **"Teste Pendente Backend"** na planilha real, deixado de propósito
+  para o usuário ver o botão "Habilitar". Perguntar se pode apagar.
+- Ainda não iniciado, do pedido do usuário: bloco de **dízimos e ofertas**, bloco do retiro
+  **Toca dos Leões** (ele vai detalhar antes — não adivinhar a estrutura), **PWA**.
+
+### Rejeitado deliberadamente (não reintroduzir)
+Fachada como plano de fundo do `cadastro.html` foi implementada e o usuário mandou reverter —
+quer o formulário com **fundo preto liso**, só a faixa de logo + nome no topo. A fachada
+aparece **apenas** no banner do painel interno.
 
 ## Estado atual
 
@@ -184,9 +191,16 @@ Na planilha, cada chave de `S` (exceto `config`) vira uma aba — `escalas` é d
 (**Escalas**: cabeçalho do mês; **Slots**: uma linha por posto) porque planilha é tabular.
 `config` fica na aba **Config** como pares chave/valor. Veja `CAB` em `Codigo.gs` para o
 cabeçalho exato de cada aba — não altere colunas direto na planilha, use o sistema. **Exceção
-deliberada:** o campo `conjuge` foi colocado no **fim** de `CAB.Membros` (não junto de
-`nascimento`, que seria mais lógico) para não deslocar as colunas existentes numa planilha já
-em uso — se adicionar mais campos novos no futuro, considere o mesmo truque.
+deliberada:** `conjuge`, `endereco` e `email` foram colocados no **fim** de `CAB.Membros` (não
+junto de `nascimento`, que seria mais lógico) para não deslocar as colunas existentes numa
+planilha já em uso — **sempre adicione campo novo no fim**, e avise o usuário para criar a
+célula do cabeçalho na planilha (minúsculo, sem acento).
+
+⚠️ **Armadilha que já custou uma sessão:** a escrita na planilha é **posicional** (grava na
+ordem de `CAB`), mas a leitura (`linhasComoObjetos`) casa pelo **texto literal do cabeçalho**.
+Se a célula do cabeçalho estiver vazia ou escrita diferente (`Cônjuge` em vez de `conjuge`), o
+dado é gravado mas volta sempre vazio, sem erro nenhum. Ao investigar "campo não salva",
+confira o cabeçalho na planilha antes de mexer no código.
 
 Datas sempre no formato `YYYY-MM-DD` como string. Nunca usar `new Date(iso)` direto — o
 parser trata como UTC e erra o dia no fuso do Brasil. Use o helper `dt(iso)`.
@@ -279,11 +293,38 @@ lista de membros).
 ## Mapa dos arquivos
 
 ```
-index.html              frontend (estático)
+index.html              frontend do sistema, com login (estático)
+cadastro.html           formulário PÚBLICO de autocadastro, sem login (estático)
 apps_script/Codigo.gs   backend (Apps Script — colar no editor vinculado à planilha)
 DEPLOY.md               passo a passo de publicação (planilha, Drive, Apps Script, hospedagem)
 CLAUDE.md               este arquivo
 ```
+
+Só esses 5 vão ao git. As imagens soltas na pasta (`fachada manancial.png`, logos, PDFs de
+referência, `*_b64.txt`) são material de trabalho e ficam fora do repositório.
+
+## Formulário público de autocadastro (`cadastro.html`)
+
+Página separada, **sem login**, para mandar o link no grupo da igreja e cada pessoa se
+cadastrar. Paleta própria (azul/cinza/preto, prefixo `--pf-*`), independente da paleta joia do
+sistema — não unificar sem pedir.
+
+Ordem dos campos é a que o usuário definiu, **não reordenar**: nome, WhatsApp, endereço, data
+de nascimento, e-mail, cônjuge (só nome completo). Depois a pergunta **"Gostaria de servir em
+algum ministério?"** com Sim/Não:
+
+- **Não** → salva na hora (`ativo: 1`). Vira só membro, nada a aprovar.
+- **Sim** → revela a lista de ministérios, **máximo 3** (`LIMITE_MINISTERIOS`), e salva com
+  `ativo: 0`. Aparece na lista do ministério **em vermelho / "Inativo"** e o gestor precisa
+  clicar em **Habilitar** antes da pessoa concorrer à escala.
+
+Usa duas ações liberadas antes da checagem de token em `doPost`: `opcoesPublicas` (devolve só
+nome/lema/logo/capa + ministérios + cultos — nada sensível) e `cadastroPublico`. O limite de 3
+é reaplicado no servidor (`.slice(0,3)`), porque validação só no navegador não vale nada.
+
+No `index.html`, a liberação é `habilitarMembro(id)` — botão dourado que aparece na lista de
+Membros e na aba Relatório do modal de ministério, só para gestor e só quando `!ativo`. O motor
+da escala já filtrava `m.ativo`, então pendente não entra em escala nem nos seletores de troca.
 
 **`index.html`**, na ordem:
 1. `<style>` — tokens em `:root`, shell, componentes, vitral, escala, mídia, modal, login,
@@ -352,10 +393,14 @@ relatório impresso com logo, tons azul/verde/preto e assinatura "Bispa Claudia"
 (`imprimirRelatorio()`). Campo `conjuge` no cadastro de membro para ministérios que escalam
 casais (ex. Recepção) — exibido como "Fulano e Beltrana" via `nomeExibicao()`.
 
-### 1. Layout, fotos da igreja e textos personalizados
-Pedido pelo usuário, ainda não iniciado. Perguntar especificamente o que trocar no layout
-antes de redesenhar — o mosaico de ministérios e os modais já foram validados e não devem ser
-descartados sem necessidade.
+### ✅ Layout, fotos da igreja e textos personalizados (feito)
+Identidade "Igreja Manancial / Casa de Destinos", logo no cabeçalho e fachada no banner do
+painel (`min-height:320px`, `object-position:center 8%` para a placa da igreja aparecer). O
+efeito de raios diagonais `.hero .luz` some sozinho quando há foto de capa
+(`.hero:has(.capa:not(.esconde)) .luz{display:none}`) — ficava riscado por cima da foto.
+
+### ✅ Formulário público de autocadastro (feito)
+`cadastro.html` — ver seção própria acima.
 
 ### 2. Bloco de gestão financeira (dízimos e ofertas)
 Ainda não desenhado. Vai precisar de: nova aba na planilha (`Financas` ou similar, seguir o
@@ -384,13 +429,10 @@ Sem biblioteca de gráfico. Barras em CSS puro, como já é feito em `renderEqui
 Dados vêm de `S` (já carregado do backend), sem necessidade de nova ação na API — a não ser
 que o volume de histórico cresça a ponto de precisar de agregação no servidor.
 
-### 6. GitHub + hospedagem pública
-`git init`, primeiro commit, repositório e deploy do `index.html` (GitHub Pages ou Netlify
-Drop, ver DEPLOY.md). Mensagens de commit em português. **O backend (Apps Script) não vai pro
-GitHub como código executável do sistema** — `apps_script/Codigo.gs` fica versionado como
-referência, mas quem roda de verdade é a cópia colada no editor do Apps Script. Hoje o sistema
-só roda localmente (`python -m http.server`) — sem isso, só quem está no mesmo computador
-acessa.
+### ✅ 6. GitHub + hospedagem pública (feito — ver seção "NO AR" no topo)
+Publicado no GitHub Pages. Mensagens de commit em português. **O backend (Apps Script) não roda
+a partir do GitHub** — `apps_script/Codigo.gs` está versionado como referência, mas quem roda de
+verdade é a cópia colada no editor do Apps Script.
 
 ### Depois (só quando pedido)
 Migração para Next.js + Supabase com upload real de vídeo e disparo da escala no WhatsApp via
@@ -408,3 +450,14 @@ upload de vídeo justificar sair do Google.
 - **Sem versionamento de dados.** Não existe "desfazer" além do histórico de revisões nativo
   do Google Sheets (Arquivo → Histórico de versões na planilha).
 - Fotos e mídia de vídeo por link continuam por URL manual quando não passam pelo upload.
+- **Apps Script é lento** (10–30s por ação). Por isso existe o overlay `#carregando` no
+  `index.html`: `chamarApi()` liga/desliga sozinho via `mostrarCarregando()`/`esconderCarregando()`
+  (contador `chamadasEmAndamento`, `try/finally`), cobre a tela inteira e bloqueia clique — foi
+  o que resolveu o usuário clicar duas vezes em "Gerar escala" e duplicar postos. Ação nova que
+  faça fetch fora do `chamarApi` (como o login) precisa chamar isso na mão.
+- **Imagem do Drive falha na 1ª requisição.** O endpoint `drive.google.com/thumbnail?id=...`
+  costuma dar erro enquanto gera o cache e funcionar na 2ª tentativa. Por isso logo e capa
+  passam por `tentarImagem(url, onSucesso)` (até 3 tentativas, cache-buster `&r=N`) e só entram
+  na tela quando confirmam carregamento — nunca setar `img.src` direto com URL do Drive.
+  `uploadImagem` no backend devolve esse formato de propósito: `uc?export=view` não funciona
+  como `<img>` embutido em página externa.
